@@ -1,23 +1,25 @@
 using UnityEngine;
 
-public class BallMovement : MonoBehaviour
+public abstract class BaseBallMovement : MonoBehaviour, IBaseBallStats, IBaseBaseMovement
 {
-    private float speed = 7;
+    public float speed { get; set; }
+    public float damage { get; set; }
+
     private Vector3? targetPosition;
 
-    void Start()
-    {
-        
-    }
-
-    public void setTarget(GameObject seekingTarget)
-    {
-        targetPosition = seekingTarget.transform.position;
-    }
-
-    private void FixedUpdate()
+    void FixedUpdate()
     {
         MoveTowardsTarget();
+    }
+
+    public void HandleDeath()
+    {
+        Destroy(gameObject);
+    }
+
+    public void SetTarget(GameObject seekingTarget)
+    {
+        targetPosition = seekingTarget.transform.position;
     }
 
     private void MoveTowardsTarget()
@@ -35,11 +37,11 @@ public class BallMovement : MonoBehaviour
         switch (collidedTag)
         {
             case "player":
-                Debug.Log("damage!");
-                Destroy(this.gameObject);
+                HandleHit(other.gameObject);
+                HandleDeath();
                 break;
             case "wall":
-                Destroy(this.gameObject);
+                HandleDeath();
                 break;
             default:
                 break;
@@ -52,13 +54,19 @@ public class BallMovement : MonoBehaviour
         switch (collidedTag)
         {
             case "player":
-                Debug.Log("damage!");
+                HandleHit(other.gameObject);
+                HandleDeath();
                 break;
             case "wall":
-                Destroy(this.gameObject);
+                HandleDeath();
                 break;
             default:
                 break;
         }
+    }
+
+    private void HandleHit(GameObject playerHit)
+    {
+        playerHit.GetComponent<PlayerMovement>().Attacked(damage);
     }
 }

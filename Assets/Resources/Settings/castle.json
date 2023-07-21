@@ -1,0 +1,22 @@
+{
+	"normal": {
+		"health": 250,
+		"numCastles": 3,
+		"numPlayers": 7
+	},
+	"heavyArmored": {
+		"health": 300,
+		"numCastles": 3,
+		"numPlayers": 10
+	},
+	"speedDemon": {
+		"health": 100,
+		"numCastles": 3,
+		"numPlayers": 5
+	},
+	"medic": {
+		"health": 500,
+		"numCastles": 3,
+		"numPlayers": 3
+	}
+}

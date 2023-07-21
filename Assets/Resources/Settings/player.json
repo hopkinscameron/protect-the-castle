@@ -1,0 +1,32 @@
+{
+	"normal": {
+		"damage": 10,
+		"health": 3,
+		"speed": 7
+	},
+	"fire": {
+		"damage": 12,
+		"health": 3,
+		"speed": 7
+	},
+	"grass": {
+		"damage": 12,
+		"health": 3,
+		"speed": 7
+	},
+	"water": {
+		"damage": 12,
+		"health": 3,
+		"speed": 7
+	},
+	"ice": {
+		"damage": 12,
+		"health": 3,
+		"speed": 7
+	},
+	"poison": {
+		"damage": 12,
+		"health": 3,
+		"speed": 7
+	}
+}

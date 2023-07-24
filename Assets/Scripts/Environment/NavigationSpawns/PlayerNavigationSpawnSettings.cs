@@ -6,13 +6,13 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
     [Serializable]
     public class PlayerNavigationSpawnSettings 
     {
-        public List<PlayerNavigationSpawn> straight;
-        public List<PlayerNavigationSpawn> left;
-        public List<PlayerNavigationSpawn> right;
+        public List<PlayerNavigationSpawnCoordinates> straight;
+        public List<PlayerNavigationSpawnCoordinates> left;
+        public List<PlayerNavigationSpawnCoordinates> right;
     }
 
     [Serializable]
-    public class PlayerNavigationSpawn 
+    public class PlayerNavigationSpawnCoordinates
     {
         public float x;
         public float z;

@@ -36,10 +36,13 @@ namespace ProtectTheCastle.Environment.TowerSpawns
 
         private IReadOnlyList<GameObject> SpawnTowerPoints(IReadOnlyList<TowerSpawn> spawns)
         {
-            return spawns.Select(spawn => {
-                GameObject cube = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Cube), new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z), transform.rotation);
-                cube.GetComponent<Renderer>().material.color = Color.blue;
-                return cube;
+            return spawns.Select((spawn, i) => {
+                GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                cylinder.name = "Tower Spawn Cylinder " + i;
+                cylinder.transform.position = new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z);
+                cylinder.GetComponent<Renderer>().material.color = Color.blue;
+                cylinder.GetComponent<CapsuleCollider>().isTrigger = true;
+                return cylinder;
             }).ToList();
         }
     }

@@ -1,5 +1,7 @@
+using System;
 using ProtectTheCastle.Game;
 using ProtectTheCastle.Players;
+using ProtectTheCastle.Shared;
 using ProtectTheCastle.Tower.Enums.Balls;
 using UnityEngine;
 
@@ -65,35 +67,23 @@ namespace ProtectTheCastle.Tower.Balls
         private void OnCollisionEnter(Collision other)
         {
             var collidedTag = other.gameObject.tag.ToLower();
-            switch (collidedTag)
+            if (collidedTag.Equals(Constants.PLAYER_1_TAG, StringComparison.OrdinalIgnoreCase))
             {
-                case "player":
-                    HandleHit(other.gameObject);
-                    HandleDeath();
-                    break;
-                case "wall":
-                    HandleDeath();
-                    break;
-                default:
-                    break;
+                HandleHit(other.gameObject);
             }
+            
+            HandleDeath();
         }
 
         private void OnTriggerEnter(Collider other) 
         {
             var collidedTag = other.gameObject.tag.ToLower();
-            switch (collidedTag)
+            if (collidedTag.Equals(Constants.PLAYER_1_TAG, StringComparison.OrdinalIgnoreCase))
             {
-                case "player":
-                    HandleHit(other.gameObject);
-                    HandleDeath();
-                    break;
-                case "wall":
-                    HandleDeath();
-                    break;
-                default:
-                    break;
+                HandleHit(other.gameObject);
             }
+            
+            HandleDeath();
         }
 
         private void HandleHit(GameObject playerHit)

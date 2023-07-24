@@ -44,7 +44,11 @@ namespace ProtectTheCastle.Environment.AISpawns
                 var prefabIndex = Random.Range(0, _aiPrefabs.Count);
                 var spawnPointIndex = Random.Range(0, _spawns.Count);
                 var spawnPoint = _spawns[spawnPointIndex];
-                ai.Add(Instantiate(_aiPrefabs[prefabIndex], new Vector3(spawnPoint.transform.position.x, DEFAULT_Y_POSITION, spawnPoint.transform.position.z), transform.rotation));
+                var forwardAngle = transform.rotation;
+                forwardAngle.eulerAngles = new Vector3(0, 0, 0);
+                var aiObject = Instantiate(_aiPrefabs[prefabIndex], new Vector3(spawnPoint.transform.position.x, DEFAULT_Y_POSITION, spawnPoint.transform.position.z), forwardAngle);
+                aiObject.name = aiObject.name + " " + x;
+                ai.Add(aiObject);
             }
 
             return ai;
@@ -74,10 +78,13 @@ namespace ProtectTheCastle.Environment.AISpawns
 
         private IReadOnlyList<GameObject> SpawnAIPoints(IReadOnlyList<AISpawn> spawns)
         {
-            return spawns.Select(spawn => {
-                GameObject cube = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Cube), new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z), transform.rotation);
-                cube.GetComponent<Renderer>().material.color = Color.cyan;
-                return cube;
+            return spawns.Select((spawn, i) => {
+                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sphere.name = "AI Spawn Sphere " + i;
+                sphere.transform.position = new Vector3(spawn.x, 0.5f, spawn.z);
+                sphere.GetComponent<Renderer>().material.color = Color.cyan;
+                sphere.GetComponent<SphereCollider>().isTrigger = true;
+                return sphere;
             }).ToList();
         }
 

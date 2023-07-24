@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ProtectTheCastle.Shared;
 using UnityEngine;
 
 namespace ProtectTheCastle.Environment.NavigationSpawns
@@ -9,7 +10,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
     {
         public static SpawnPlayerNavigationPoints Instance { get; private set; }
 
-        private const float DEFAULT_Y_POSITION = 0;
+        private const float DEFAULT_Y_POSITION = 1;
         private IReadOnlyList<GameObject> _straight;
         private IReadOnlyList<GameObject> _left;
         private IReadOnlyList<GameObject> _right;
@@ -31,14 +32,14 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
             var contents = (TextAsset) Resources.Load("Settings/player-navigation-path-spawns", typeof(TextAsset));
             var spawnSettings = JsonUtility.FromJson<PlayerNavigationSpawnSettings>(contents.text);
 
-            _left = SpawnNavigationPoints(spawnSettings.left);
-            _straight = SpawnNavigationPoints(spawnSettings.straight);
-            _right = SpawnNavigationPoints(spawnSettings.right);
+            _left = SpawnNavigationPoints(spawnSettings.left, "Left");
+            _straight = SpawnNavigationPoints(spawnSettings.straight, "Straight");
+            _right = SpawnNavigationPoints(spawnSettings.right, "Right");
         }
 
         public GameObject GetHomeBaseSpawn(GameObject homeBase)
         {
-            if (homeBase.tag.Equals("Player Castle", StringComparison.OrdinalIgnoreCase))
+            if (homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
             {
                 return _straight[0];
             }
@@ -94,12 +95,16 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
             return GetNextTargetBasedOnCastle(homeBase, currentSpawnSystem, currentIndex);
         }
 
-        private IReadOnlyList<GameObject> SpawnNavigationPoints(IReadOnlyList<PlayerNavigationSpawn> spawns)
+        private IReadOnlyList<GameObject> SpawnNavigationPoints(IReadOnlyList<PlayerNavigationSpawnCoordinates> spawns, string positionTitle)
         {
-            return spawns.Select(spawn => {
-                GameObject cube = Instantiate(GameObject.CreatePrimitive(PrimitiveType.Cube), new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z), transform.rotation);
-                cube.GetComponent<Renderer>().material.color = Color.white;
-                return cube;
+            return spawns.Select((spawn, i) => {
+                GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                capsule.name = "Player Spawn Capsule " + positionTitle + " " + i;
+                capsule.transform.position = new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z);
+                capsule.GetComponent<Renderer>().material.color = Color.white;
+                capsule.AddComponent<PlayerNavigationSpawn>();
+                capsule.GetComponent<CapsuleCollider>().isTrigger = true;
+                return capsule;
             }).ToList();
         }
 
@@ -134,7 +139,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
         private GameObject GetNextTargetBasedOnCastle(GameObject homeBase, IReadOnlyList<GameObject> currentSpawnSystem, int currentIndex)
         {
             var nextIndex = -1;
-            if (homeBase.tag.Equals("Player Castle", StringComparison.OrdinalIgnoreCase))
+            if (homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
             {
                 nextIndex = currentIndex + 1;
                 return nextIndex < currentSpawnSystem.Count ? currentSpawnSystem[nextIndex] : null;

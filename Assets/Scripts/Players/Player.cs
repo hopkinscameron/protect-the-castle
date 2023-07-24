@@ -69,18 +69,32 @@ namespace ProtectTheCastle.Players
             Destroy(gameObject);
         }
 
-        public void Move()
+        public bool Move()
         {
+            var previousTarget = _target;
             _target = _target == null
                 ? SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, transform.position)
                 : SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, _target);
+
+            var occupiedBy = _target.GetComponent<PlayerNavigationSpawn>().occupiedBy;
+            if (occupiedBy != null)
+            {
+                Debug.Log(gameObject.name + " could not move because the target "
+                    + _target.name + " at (" + _target.transform.position.x + "," + _target.transform.position.z
+                    + ") is already occupied by " + occupiedBy.name);
+                _target = previousTarget;
+                return false;
+            }
+
+            Debug.Log(gameObject.name + " is moving towards " + _target.name + " at " + _target.transform.position.x + "," + _target.transform.position.z);
             _navMeshAgent.destination = _target.transform.position;
             _shouldMove = true;
+            return true;
         }
 
         public void SetHome(GameObject homeBase)
         {
-            _player1 = homeBase.tag.Equals("Player Castle", StringComparison.OrdinalIgnoreCase);
+            _player1 = homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase);
             _homeCastle = homeBase;
         }
 
@@ -101,15 +115,15 @@ namespace ProtectTheCastle.Players
             }
         }
 
-        private void RestartMovement()
-        {
-            Move();
-        }
-
         private void MovePlayer()
         {
-            _animator.SetFloat("Speed", _navMeshAgent.velocity.magnitude);
+            _animator.SetFloat(Constants.ANIMATOR_SPEED_NAME, _navMeshAgent.velocity.magnitude);
             _shouldMove = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
+
+            if (!_shouldMove && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
+            {
+                GameManager.Instance.EndTurn();
+            }
         }
     }
 }

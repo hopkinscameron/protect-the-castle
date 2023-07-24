@@ -1,5 +1,6 @@
 using ProtectTheCastle.Enums.Towers;
 using ProtectTheCastle.Game;
+using ProtectTheCastle.Shared;
 using ProtectTheCastle.Tower.Balls;
 using UnityEngine;
 
@@ -22,15 +23,15 @@ namespace ProtectTheCastle.Towers
 
         private void Awake()
         {
-            _isPlayerTower = gameObject.tag.Equals("Player Tower", System.StringComparison.OrdinalIgnoreCase);
+            _isPlayerTower = gameObject.tag.Equals(Constants.PLAYER_1_TOWER_TAG, System.StringComparison.OrdinalIgnoreCase);
 
             if (_isPlayerTower)
             {
-                _player = GameObject.FindGameObjectWithTag("Enemy");
+                _player = GameObject.FindGameObjectWithTag(Constants.PLAYER_2_TAG);
             }
             else
             {
-                _player = GameObject.FindGameObjectWithTag("Player");
+                _player = GameObject.FindGameObjectWithTag(Constants.PLAYER_1_TAG);
             }
         }
 

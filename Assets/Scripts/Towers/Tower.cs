@@ -20,7 +20,7 @@ namespace ProtectTheCastle.Towers
         private float _timeSinceLastShot;
         private bool _isPlayerTower;
 
-        void Awake()
+        private void Awake()
         {
             _isPlayerTower = gameObject.tag.Equals("Player Tower", System.StringComparison.OrdinalIgnoreCase);
 
@@ -34,7 +34,7 @@ namespace ProtectTheCastle.Towers
             }
         }
 
-        void Start()
+        private void Start()
         {
             TowerPrefabTypeSettings settings = GetSettings();
             coolDown = settings.coolDown;
@@ -43,7 +43,7 @@ namespace ProtectTheCastle.Towers
             minEngageDistance = settings.minEngageDistance;
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             health = health - healthDecreaseAmount * Time.deltaTime;
             if (health <= 0)

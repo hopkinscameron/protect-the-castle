@@ -14,14 +14,14 @@ namespace ProtectTheCastle.Tower.Balls
         private EnumBallType _type;
         private Vector3? _targetPosition;
 
-        void Start()
+        private void Start()
         {
             BallPrefabTypeSettings settings = GetSettings();
             speed = settings.speed;
             damage = settings.damage;
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
             MoveTowardsTarget();
         }

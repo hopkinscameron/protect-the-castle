@@ -1,9 +1,15 @@
+using System;
 using ProtectTheCastle.Enums.Players;
+using ProtectTheCastle.Environment.NavigationSpawns;
 using ProtectTheCastle.Game;
+using ProtectTheCastle.Shared;
 using UnityEngine;
+using UnityEngine.AI;
 
 namespace ProtectTheCastle.Players
 {
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(NavMeshAgent))]
     public class Player : MonoBehaviour, IPlayer
     {
         public float damage { get; private set; }
@@ -12,49 +18,34 @@ namespace ProtectTheCastle.Players
 
         [SerializeField]
         private EnumPlayerType _type;
+        private NavMeshAgent _navMeshAgent;
+        private Animator _animator;
+        private GameObject _homeCastle;
+        private GameObject _target;
         private bool _shouldMove;
-        private Vector3 _homeCastlePosition;
-        private StepManager _stepManager;
-        private GameObject _targetStep;
-        private bool _isPlayer;
+        private INavMeshAgentHelper _navMeshAgentHelper;
+        private bool _player1;
 
-        void Awake()
+        private void Awake()
         {
-            _isPlayer = gameObject.tag.Equals("Player", System.StringComparison.OrdinalIgnoreCase);
-            _stepManager = GameObject.Find("Steps").GetComponent<StepManager>();
-
-            if (_isPlayer)
-            {
-                _homeCastlePosition = GameObject.FindGameObjectWithTag("Player Castle").transform.position;
-            }
-            else
-            {
-                _homeCastlePosition = GameObject.FindGameObjectWithTag("Enemy Castle").transform.position;
-            }
+            _navMeshAgent = GetComponent<NavMeshAgent>();
+            _animator = GetComponent<Animator>();
+            _navMeshAgentHelper = new NavMeshAgentHelper();
         }
 
-        void Start()
+        private void Start()
         {
             PlayerPrefabTypeSettings settings = GetSettings();
             damage = settings.damage;
             health = settings.health;
             speed = settings.speed;
-
-            Invoke("RestartMovement", 1);
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
-            if (_shouldMove)
+            if (_shouldMove && _target)
             {
-                if (_targetStep == null)
-                {
-                    _targetStep = _stepManager.GetNextClosestStep(transform.position, _homeCastlePosition, _isPlayer ? 1 : -1);
-                }
-                else
-                {
-                    MovePlayer();
-                }
+                MovePlayer();
             }
         }
 
@@ -80,7 +71,17 @@ namespace ProtectTheCastle.Players
 
         public void Move()
         {
+            _target = _target == null
+                ? SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, transform.position)
+                : SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, _target);
+            _navMeshAgent.destination = _target.transform.position;
             _shouldMove = true;
+        }
+
+        public void SetHome(GameObject homeBase)
+        {
+            _player1 = homeBase.tag.Equals("Player Castle", StringComparison.OrdinalIgnoreCase);
+            _homeCastle = homeBase;
         }
 
         private PlayerPrefabTypeSettings GetSettings()
@@ -107,26 +108,8 @@ namespace ProtectTheCastle.Players
 
         private void MovePlayer()
         {
-            if (_targetStep != null)
-            {
-                var step = speed * Time.deltaTime;
-                var onlyOneAxisPosition = new Vector3(transform.position.x, transform.position.y, _targetStep.transform.position.z);
-                transform.position = Vector3.MoveTowards(transform.position, onlyOneAxisPosition, step);
-                if (Vector3.Distance(transform.position, onlyOneAxisPosition) < 0.001f)
-                {
-                    if (_targetStep.name.ToLower() != "ai home step")
-                    {
-                        _shouldMove = false;
-                        _targetStep = null;
-                        Invoke("RestartMovement", 1);
-                    }
-                    else
-                    {
-                        this._shouldMove = false;
-                        Debug.Log("won!");
-                    }
-                }
-            }
+            _animator.SetFloat("Speed", _navMeshAgent.velocity.magnitude);
+            _shouldMove = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
         }
     }
 }

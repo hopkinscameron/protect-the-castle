@@ -1,6 +1,8 @@
+using System;
+
 namespace ProtectTheCastle.Game
 {
-    [System.Serializable]
+    [Serializable]
     public class PlayerPrefabSettings 
     {
         public PlayerPrefabTypeSettings normal;
@@ -11,7 +13,7 @@ namespace ProtectTheCastle.Game
         public PlayerPrefabTypeSettings poison;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class PlayerPrefabTypeSettings 
     {
         public float damage;

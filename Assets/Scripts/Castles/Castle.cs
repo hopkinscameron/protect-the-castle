@@ -13,7 +13,7 @@ namespace ProtectTheCastle.Castles
 		[SerializeField]
         private EnumCastleType _type;
 
-		void Start()
+		private void Start()
         {
             CastlePrefabTypeSettings settings = GetSettings();
             health = settings.health;

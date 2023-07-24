@@ -12,5 +12,6 @@ namespace ProtectTheCastle.Players
         void Attacked(float amount);
         void HandleDeath();
         void Move();
+        void SetHome(GameObject homeBase);
     }
 }

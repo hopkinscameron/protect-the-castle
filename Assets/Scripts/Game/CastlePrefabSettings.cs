@@ -1,6 +1,8 @@
+using System;
+
 namespace ProtectTheCastle.Game
 {
-    [System.Serializable]
+    [Serializable]
     public class CastlePrefabSettings 
     {
         public CastlePrefabTypeSettings normal;
@@ -9,7 +11,7 @@ namespace ProtectTheCastle.Game
         public CastlePrefabTypeSettings medic;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class CastlePrefabTypeSettings 
     {
         public float health;

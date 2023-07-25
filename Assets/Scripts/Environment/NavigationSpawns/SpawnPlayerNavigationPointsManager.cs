@@ -119,6 +119,8 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 capsule.GetComponent<Renderer>().material.color = Color.white;
                 var playerNavigationSpawn = capsule.AddComponent<PlayerNavigationSpawn>();
                 playerNavigationSpawn.isDecisionSpawn = spawn.isDecisionSpawn;
+                playerNavigationSpawn.isPlayer1WinCondition = positionTitle == "Common" && i == spawns.Count - 1;
+                playerNavigationSpawn.isPlayer2WinCondition = positionTitle == "Common" && i == 0;
                 capsule.GetComponent<CapsuleCollider>().isTrigger = true;
                 return capsule;
             }).ToList();
@@ -160,9 +162,23 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
             if (isDecisionSpawn)
             {
-                // TODO: this is test for AI, instead we'd know the isDecisionSpawn and we'd know the next path
-                var randomDirection = UnityEngine.Random.Range(0, 3);
                 var path = _straight;
+                if (isPlayer1)
+                {
+                    nextIndex = isPlayer1 ? currentIndex + 1 : currentIndex - 1;
+                }
+
+                if (currentSpawnSystem == _common)
+                {
+                    var potentialWinSpawn = currentSpawnSystem[nextIndex];
+                    var pns = potentialWinSpawn.GetComponent<PlayerNavigationSpawn>();
+                    if ((isPlayer1 && pns.isPlayer1WinCondition) || (!isPlayer1 && pns.isPlayer2WinCondition))
+                    {
+                        return potentialWinSpawn;
+                    }
+                }
+
+                var randomDirection = UnityEngine.Random.Range(0, 3);
                 switch (randomDirection)
                 {
                     case 0:
@@ -175,6 +191,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
                 if (isPlayer1)
                 {
+                    // TODO: used for testing
                     return _straight[0];
                 }
                 
@@ -183,11 +200,9 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
             if (isPlayer1)
             {
-                nextIndex = currentIndex + 1;
                 return nextIndex < currentSpawnSystem.Count ? currentSpawnSystem[nextIndex] : null;
             }
 
-            nextIndex = currentIndex - 1;
             return nextIndex > -1 ? currentSpawnSystem[nextIndex] : null;
         }
     }

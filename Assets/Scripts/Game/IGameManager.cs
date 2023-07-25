@@ -16,5 +16,6 @@ namespace ProtectTheCastle.Game
         bool FinishPickingTowers();
         void MovePlayer(GameObject characterToMove);
         void EndTurn();
+        bool EndGame(GameObject winner);
     }
 }

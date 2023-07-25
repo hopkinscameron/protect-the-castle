@@ -7,6 +7,8 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
     {
         public GameObject occupiedBy { get; private set; }
         public bool isDecisionSpawn { get; set; }
+        public bool isPlayer1WinCondition { get; set; }
+        public bool isPlayer2WinCondition { get; set; }
 
         private void OnTriggerEnter(Collider collider)
         {

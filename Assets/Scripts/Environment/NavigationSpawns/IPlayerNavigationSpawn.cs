@@ -6,5 +6,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
     {
         GameObject occupiedBy { get; }
         bool isDecisionSpawn { get; set; }
+        bool isPlayer1WinCondition { get; set; }
+        bool isPlayer2WinCondition { get; set; }
     }
 }

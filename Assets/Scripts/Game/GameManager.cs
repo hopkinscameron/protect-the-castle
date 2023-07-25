@@ -176,6 +176,17 @@ namespace ProtectTheCastle.Game
             }
         }
 
+        public bool EndGame(GameObject winner)
+        {
+            if (gameInProgress)
+            {
+                gameInProgress = false;
+                Debug.Log("The winner is " + winner.tag);
+            }
+
+            return gameInProgress;
+        }
+
         private void SpawnPlayers()
         {
             _player2 = new List<GameObject>();
@@ -189,6 +200,8 @@ namespace ProtectTheCastle.Game
             var player2HomeBaseSpawn = SpawnPlayerNavigationPoints.Instance.GetHomeBaseSpawn(player2Castle);
             _player1 = new List<GameObject> {
                 Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Soldier", typeof(GameObject)),
+                    // TODO: used for testing:
+                    // new Vector3(50, 0, 81),
                     new Vector3(player1HomeBaseSpawn.transform.position.x, 0, player1HomeBaseSpawn.transform.position.z),
                     player1ForwardAngle),
                 // Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Hero", typeof(GameObject)),

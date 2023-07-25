@@ -126,6 +126,15 @@ namespace ProtectTheCastle.Players
             {
                 _lastTarget = _nextTarget;
                 _nextTarget = null;
+
+                var pns = _lastTarget.GetComponent<PlayerNavigationSpawn>();
+                if ((_player1 && pns.isPlayer1WinCondition) || (!_player1 && pns.isPlayer2WinCondition))
+                {
+                    GameManager.Instance.EndGame(gameObject);
+                    _animator.SetTrigger(Constants.ANIMATOR_VICTORY_NAME);
+                    return;
+                }
+
                 GameManager.Instance.EndTurn();
             }
         }

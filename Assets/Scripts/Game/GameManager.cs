@@ -29,6 +29,7 @@ namespace ProtectTheCastle.Game
         private GameObject _player1LastCharacterMoved;
         private GameObject _player2LastCharacterMoved;
         private int attemptsToMove = 0;
+        private bool moving = false;
 
         private void Awake()
         {
@@ -44,12 +45,21 @@ namespace ProtectTheCastle.Game
             _camera = GameObject.FindGameObjectWithTag(Constants.VIRTUAL_CAMERA_TAG);
         }
 
+        private void Update()
+        {
+            if(Input.GetButtonUp("Jump") && isPlayer1Turn && !moving)
+            {
+                moving = true;
+                AttemptToMovePlayer();
+            }
+        }
+
         public bool StartGame()
         {
             if (!gameInProgress)
             {
-                Debug.Log("Game Started");
-                isPlayer1Turn = UnityEngine.Random.Range(0, 2) == 0;
+                // Debug.Log("Game Started");
+                isPlayer1Turn = true; // UnityEngine.Random.Range(0, 2) == 0;
                 gameInProgress = true;
                 StartPickingPlayers();
 
@@ -58,7 +68,8 @@ namespace ProtectTheCastle.Game
                 StartPickingTowers();
                 FinishPickingTowers();
                 SpawnPlayers();
-                AttemptToMovePlayer();
+
+                FocusCharacter(_player1[0]);
             }
 
             return gameInProgress;
@@ -68,7 +79,7 @@ namespace ProtectTheCastle.Game
         {
             if (gameInProgress && !_playersPicked)
             {
-                Debug.Log("Picking Players");
+                // Debug.Log("Picking Players");
                 pickingPlayers = true;
                 return true;
             }
@@ -80,7 +91,7 @@ namespace ProtectTheCastle.Game
         {
             if (gameInProgress && pickingPlayers && !_playersPicked)
             {
-                Debug.Log("Finished Picking Players");
+                // Debug.Log("Finished Picking Players");
                 pickingPlayers = false;
                 _playersPicked = true;
                 return true;
@@ -93,7 +104,7 @@ namespace ProtectTheCastle.Game
         {
             if (gameInProgress && !pickingPlayers && _playersPicked && !_towersPicked)
             {
-                Debug.Log("Picking Towers");
+                // Debug.Log("Picking Towers");
                 pickingTowers = true;
                 return true;
             }
@@ -105,7 +116,7 @@ namespace ProtectTheCastle.Game
         {
             if (gameInProgress && pickingTowers && !_towersPicked)
             {
-                Debug.Log("Finished Picking Towers");
+                // Debug.Log("Finished Picking Towers");
                 pickingTowers = false;
                 _towersPicked = true;
                 return true;
@@ -117,8 +128,7 @@ namespace ProtectTheCastle.Game
         public void MovePlayer(GameObject characterToMove)
         {
             if (!gameInProgress || !_gameReady || characterToMove == null
-                || (isPlayer1Turn && attemptsToMove >= _player1.Count)
-                || (attemptsToMove >= _player2.Count)) return;
+                || (!isPlayer1Turn && attemptsToMove >= (_player2.Count * 2))) return;
 
             if ((isPlayer1Turn && characterToMove.tag.Equals(Constants.PLAYER_1_TAG, StringComparison.OrdinalIgnoreCase))
                 || (!isPlayer1Turn && characterToMove.tag.Equals(Constants.PLAYER_2_TAG, StringComparison.OrdinalIgnoreCase)))
@@ -146,8 +156,6 @@ namespace ProtectTheCastle.Game
                 }
 
                 attemptsToMove = 0;
-                _camera.GetComponent<CinemachineVirtualCamera>().Follow = characterToMove.transform;
-                _camera.GetComponent<CinemachineVirtualCamera>().LookAt = characterToMove.transform;
             }
         }
 
@@ -155,7 +163,17 @@ namespace ProtectTheCastle.Game
         {
             Debug.Log(isPlayer1Turn ? "Player 1 turn ended" : "Player 2 turn ended");
             isPlayer1Turn = !isPlayer1Turn;
-            AttemptToMovePlayer();
+            FocusCharacter(isPlayer1Turn ? _player1[0] : _player2[0]);
+            
+            if (!isPlayer1Turn)
+            {
+                
+                AttemptToMovePlayer();
+            }
+            else
+            {
+                moving = false;
+            }
         }
 
         private void SpawnPlayers()
@@ -173,23 +191,23 @@ namespace ProtectTheCastle.Game
                 Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Soldier", typeof(GameObject)),
                     new Vector3(player1HomeBaseSpawn.transform.position.x, 0, player1HomeBaseSpawn.transform.position.z),
                     player1ForwardAngle),
-                Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Hero", typeof(GameObject)),
-                    new Vector3(player1HomeBaseSpawn.transform.position.x + 2f, 0, player1HomeBaseSpawn.transform.position.z),
-                    player1ForwardAngle),
-                Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Dog", typeof(GameObject)),
-                    new Vector3(player1HomeBaseSpawn.transform.position.x - 2f, 0, player1HomeBaseSpawn.transform.position.z),
-                    player1ForwardAngle)
+                // Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Hero", typeof(GameObject)),
+                //     new Vector3(player1HomeBaseSpawn.transform.position.x + 2f, 0, player1HomeBaseSpawn.transform.position.z),
+                //     player1ForwardAngle),
+                // Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Dog", typeof(GameObject)),
+                //     new Vector3(player1HomeBaseSpawn.transform.position.x - 2f, 0, player1HomeBaseSpawn.transform.position.z),
+                //     player1ForwardAngle)
             };
 
             var player2ForwardAngle = transform.rotation;
             player2ForwardAngle.eulerAngles = new Vector3(0, 180, 0);
             _player2 = new List<GameObject> {
-                Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Golem", typeof(GameObject)),
-                    new Vector3(player2HomeBaseSpawn.transform.position.x, 0, player2HomeBaseSpawn.transform.position.z),
-                    player2ForwardAngle),
-                Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Grunt", typeof(GameObject)),
-                    new Vector3(player2HomeBaseSpawn.transform.position.x + 2f, 0, player2HomeBaseSpawn.transform.position.z),
-                    player2ForwardAngle),
+                // Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Golem", typeof(GameObject)),
+                //     new Vector3(player2HomeBaseSpawn.transform.position.x, 0, player2HomeBaseSpawn.transform.position.z),
+                //     player2ForwardAngle),
+                // Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Grunt", typeof(GameObject)),
+                //     new Vector3(player2HomeBaseSpawn.transform.position.x + 2f, 0, player2HomeBaseSpawn.transform.position.z),
+                //     player2ForwardAngle),
                 Instantiate((GameObject) Resources.Load("Prefabs/Soldiers/Lich", typeof(GameObject)),
                     new Vector3(player2HomeBaseSpawn.transform.position.x - 2f, 0, player2HomeBaseSpawn.transform.position.z),
                     player2ForwardAngle)
@@ -207,7 +225,7 @@ namespace ProtectTheCastle.Game
                 player2GameObject.tag = Constants.PLAYER_2_TAG;
             }
 
-            Debug.Log("Players Spawned, Game Ready");
+            // Debug.Log("Players Spawned, Game Ready");
             _gameReady = true;
         }
 
@@ -216,19 +234,7 @@ namespace ProtectTheCastle.Game
             GameObject characterToMove = null;
             if (isPlayer1Turn)
             {
-                for (var x = 0; x < _player1.Count; x++)
-                {
-                    if (_player1[x] == _player1LastCharacterMoved)
-                    {
-                        characterToMove = _player1[(x + 1) % _player1.Count];
-                        break;
-                    }
-                }
-
-                if (characterToMove == null)
-                {
-                    characterToMove = _player1[UnityEngine.Random.Range(0, _player1.Count)];
-                }
+                characterToMove = _player1[0];
             }
             else
             {
@@ -248,6 +254,12 @@ namespace ProtectTheCastle.Game
             }
 
             MovePlayer(characterToMove);
+        }
+
+        private void FocusCharacter(GameObject characterToFocus)
+        {
+            _camera.GetComponent<CinemachineVirtualCamera>().Follow = characterToFocus.transform;
+            _camera.GetComponent<CinemachineVirtualCamera>().LookAt = characterToFocus.transform;
         }
     }
 }

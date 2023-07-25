@@ -61,7 +61,6 @@ namespace ProtectTheCastle.Towers
             {
                 if (_timeSinceLastShot <= Time.time)
                 {
-                    Debug.Log("Fire!");
                     GameObject spawnedBall = Instantiate(_ballPrefab, transform.position, transform.rotation);
                     IBall spawnedBallMovementScript = spawnedBall.GetComponent<Ball>();
                     spawnedBallMovementScript.SetTarget(_player);

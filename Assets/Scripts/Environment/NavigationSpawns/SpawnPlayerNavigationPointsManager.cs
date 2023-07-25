@@ -11,6 +11,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
         public static SpawnPlayerNavigationPoints Instance { get; private set; }
 
         private const float DEFAULT_Y_POSITION = 1;
+        private IReadOnlyList<GameObject> _common;
         private IReadOnlyList<GameObject> _straight;
         private IReadOnlyList<GameObject> _left;
         private IReadOnlyList<GameObject> _right;
@@ -30,30 +31,38 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
         public void Load()
         {
             var contents = (TextAsset) Resources.Load("Settings/player-navigation-path-spawns", typeof(TextAsset));
-            var spawnSettings = JsonUtility.FromJson<PlayerNavigationSpawnSettings>(contents.text);
+            var spawnLevelDirectionSettings = JsonUtility.FromJson<PlayerNavigationSpawnLevel>(contents.text).forest;
 
-            _left = SpawnNavigationPoints(spawnSettings.left, "Left");
-            _straight = SpawnNavigationPoints(spawnSettings.straight, "Straight");
-            _right = SpawnNavigationPoints(spawnSettings.right, "Right");
+            _common = SpawnNavigationPoints(spawnLevelDirectionSettings.common, "Common");
+            _left = SpawnNavigationPoints(spawnLevelDirectionSettings.left, "Left");
+            _straight = SpawnNavigationPoints(spawnLevelDirectionSettings.straight, "Straight");
+            _right = SpawnNavigationPoints(spawnLevelDirectionSettings.right, "Right");
         }
 
         public GameObject GetHomeBaseSpawn(GameObject homeBase)
         {
             if (homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
             {
-                return _straight[0];
+                return _common[0];
             }
 
-            return _straight[_straight.Count - 1];
+            return _common[_common.Count - 1];
         }
 
         public GameObject GetNextTarget(GameObject homeBase, Vector3 currentPosition)
         {
-            var currentSpawnSystem = _left;
+            var currentSpawnSystem = _common;
             var currentIndex = GetCurrentIndex(currentSpawnSystem, currentPosition);
+
             if (currentIndex == -1)
             {
                 currentSpawnSystem = _straight;
+                currentIndex = GetCurrentIndex(currentSpawnSystem, currentPosition);
+            }
+
+            if (currentIndex == -1)
+            {
+                currentSpawnSystem = _left;
                 currentIndex = GetCurrentIndex(currentSpawnSystem, currentPosition);
             }
 
@@ -73,11 +82,17 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
         public GameObject GetNextTarget(GameObject homeBase, GameObject currentTarget)
         {
-            var currentSpawnSystem = _left;
+            var currentSpawnSystem = _common;
             var currentIndex = GetCurrentIndex(currentSpawnSystem, currentTarget);
             if (currentIndex == -1)
             {
                 currentSpawnSystem = _straight;
+                currentIndex = GetCurrentIndex(currentSpawnSystem, currentTarget);
+            }
+
+            if (currentIndex == -1)
+            {
+                currentSpawnSystem = _left;
                 currentIndex = GetCurrentIndex(currentSpawnSystem, currentTarget);
             }
 
@@ -102,7 +117,8 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 capsule.name = "Player Spawn Capsule " + positionTitle + " " + i;
                 capsule.transform.position = new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z);
                 capsule.GetComponent<Renderer>().material.color = Color.white;
-                capsule.AddComponent<PlayerNavigationSpawn>();
+                var playerNavigationSpawn = capsule.AddComponent<PlayerNavigationSpawn>();
+                playerNavigationSpawn.isDecisionSpawn = spawn.isDecisionSpawn;
                 capsule.GetComponent<CapsuleCollider>().isTrigger = true;
                 return capsule;
             }).ToList();
@@ -138,8 +154,34 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
         private GameObject GetNextTargetBasedOnCastle(GameObject homeBase, IReadOnlyList<GameObject> currentSpawnSystem, int currentIndex)
         {
+            var isDecisionSpawn = currentSpawnSystem[currentIndex].GetComponent<PlayerNavigationSpawn>().isDecisionSpawn;
             var nextIndex = -1;
-            if (homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
+            var isPlayer1 = homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase);
+
+            if (isDecisionSpawn)
+            {
+                // TODO: this is test for AI, instead we'd know the isDecisionSpawn and we'd know the next path
+                var randomDirection = UnityEngine.Random.Range(0, 3);
+                var path = _straight;
+                switch (randomDirection)
+                {
+                    case 0:
+                        path = _left;
+                        break;
+                    case 1:
+                        path = _right;
+                        break;
+                }
+
+                if (isPlayer1)
+                {
+                    return _straight[0];
+                }
+                
+                return path[path.Count - 1];
+            }
+
+            if (isPlayer1)
             {
                 nextIndex = currentIndex + 1;
                 return nextIndex < currentSpawnSystem.Count ? currentSpawnSystem[nextIndex] : null;

@@ -21,7 +21,10 @@ namespace ProtectTheCastle.Players
         private NavMeshAgent _navMeshAgent;
         private Animator _animator;
         private GameObject _homeCastle;
-        private GameObject _target;
+        [SerializeField]
+        private GameObject _lastTarget;
+        [SerializeField]
+        private GameObject _nextTarget;
         private bool _shouldMove;
         private INavMeshAgentHelper _navMeshAgentHelper;
         private bool _player1;
@@ -43,7 +46,7 @@ namespace ProtectTheCastle.Players
 
         private void FixedUpdate()
         {
-            if (_shouldMove && _target)
+            if (_shouldMove && _nextTarget)
             {
                 MovePlayer();
             }
@@ -71,25 +74,24 @@ namespace ProtectTheCastle.Players
 
         public bool Move()
         {
-            var previousTarget = _target;
-            _target = _target == null
+            var previousTarget = _nextTarget;
+            _nextTarget = _nextTarget == null
                 ? SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, transform.position)
-                : SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, _target);
-
-            var occupiedBy = _target.GetComponent<PlayerNavigationSpawn>().occupiedBy;
+                : SpawnPlayerNavigationPoints.Instance.GetNextTarget(_homeCastle, _nextTarget);
+ 
+            var occupiedBy = _nextTarget.GetComponent<PlayerNavigationSpawn>().occupiedBy;
             if (occupiedBy != null)
             {
                 Debug.Log(gameObject.name + " could not move because the target "
-                    + _target.name + " at (" + _target.transform.position.x + "," + _target.transform.position.z
+                    + _nextTarget.name + " at (" + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z
                     + ") is already occupied by " + occupiedBy.name);
-                _target = previousTarget;
+                _nextTarget = previousTarget;
                 return false;
             }
 
-            Debug.Log(gameObject.name + " is moving towards " + _target.name + " at " + _target.transform.position.x + "," + _target.transform.position.z);
-            _navMeshAgent.destination = _target.transform.position;
-            _shouldMove = true;
-            return true;
+            Debug.Log(gameObject.name + " is moving towards " + _nextTarget.name + " at " + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z);
+            _shouldMove = _navMeshAgent.SetDestination(_nextTarget.transform.position);
+            return _shouldMove;
         }
 
         public void SetHome(GameObject homeBase)
@@ -122,6 +124,8 @@ namespace ProtectTheCastle.Players
 
             if (!_shouldMove && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
             {
+                _lastTarget = _nextTarget;
+                _nextTarget = null;
                 GameManager.Instance.EndTurn();
             }
         }

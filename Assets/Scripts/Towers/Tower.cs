@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using ProtectTheCastle.Enums.Towers;
@@ -32,7 +33,7 @@ namespace ProtectTheCastle.Towers
 
         private void Awake()
         {
-            _isPlayerTower = gameObject.tag.Equals(Constants.Player1.CASTLE_TAG, System.StringComparison.OrdinalIgnoreCase);
+            _isPlayerTower = gameObject.tag.Equals(Constants.Player1.TOWER_TAG, System.StringComparison.OrdinalIgnoreCase);
         }
 
         private void Start()
@@ -98,9 +99,7 @@ namespace ProtectTheCastle.Towers
                     }
                     else if (_timeSinceLastShot <= Time.time)
                     {
-                        var spawnedBall = Instantiate(_ballPrefab, _muzzle.transform.position, _muzzle.transform.rotation);
-                        (spawnedBall.GetComponent(typeof(IBall)) as IBall).SetTarget(_currentTarget);
-                        _timeSinceLastShot = Time.time + coolDown;
+                        StartCoroutine("Fire");
                     }
                 }
                 else
@@ -135,6 +134,18 @@ namespace ProtectTheCastle.Towers
         private bool IsTargetWithinDistance(GameObject target)
         {
             return Vector3.Distance(_muzzle.transform.position, target.transform.position) < minEngageDistance;
+        }
+
+        private IEnumerator Fire()
+        {
+            _timeSinceLastShot = Time.time + coolDown;
+            yield return new WaitForSeconds(0.25f);
+            
+            if (_currentTarget != null)
+            {
+                var spawnedBall = Instantiate(_ballPrefab, _muzzle.transform.position, _muzzle.transform.rotation);
+                (spawnedBall.GetComponent(typeof(IBall)) as IBall).SetTarget(_currentTarget);
+            }
         }
     }
 }

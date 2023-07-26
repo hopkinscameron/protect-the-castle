@@ -163,7 +163,6 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
             if (nextSpawnSystem == _common)
             {
-                
                 var isDecisionSpawn = (nextSpawnSystem[currentIndex].GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isDecisionSpawn;
 
                 if (isDecisionSpawn)

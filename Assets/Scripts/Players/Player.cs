@@ -18,6 +18,7 @@ namespace ProtectTheCastle.Players
         public float speed { get; private set; }
         public bool alive { get; private set; } = true;
         public bool moving { get; private set; }
+        public float remainingDistance;
 
         [SerializeField]
         private EnumPlayerType _type;
@@ -44,6 +45,7 @@ namespace ProtectTheCastle.Players
             damage = settings.damage;
             health = settings.health;
             speed = settings.speed;
+            _navMeshAgent.speed = speed;
         }
 
         private void FixedUpdate()
@@ -78,6 +80,8 @@ namespace ProtectTheCastle.Players
         public void HandleDeath()
         {
             alive = false;
+            moving = false;
+            _navMeshAgent.isStopped = true;
             _animator.SetTrigger(Constants.Animations.DIE_NAME);
             StartCoroutine("Die");
         }
@@ -140,6 +144,7 @@ namespace ProtectTheCastle.Players
         {
             _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             moving = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
+            remainingDistance = _navMeshAgent.remainingDistance;
 
             if (!moving && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
             {
@@ -161,7 +166,7 @@ namespace ProtectTheCastle.Players
         private IEnumerator Die()
         {
             yield return new WaitForSeconds(20);
-            Destroy(this.gameObject);
+            Destroy(gameObject);
         }
     }
 }

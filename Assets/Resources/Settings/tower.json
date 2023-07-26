@@ -6,7 +6,7 @@
 		"minEngageDistance": 15
 	},
 	"fire": {
-		"coolDown": 7,
+		"coolDown": 7.5,
 		"health": 100,
 		"healthDecreaseAmount": 1.5,
 		"minEngageDistance": 20
@@ -18,7 +18,7 @@
 		"minEngageDistance": 20
 	},
 	"water": {
-		"coolDown": 7,
+		"coolDown": 7.5,
 		"health": 100,
 		"healthDecreaseAmount": 1.5,
 		"minEngageDistance": 20

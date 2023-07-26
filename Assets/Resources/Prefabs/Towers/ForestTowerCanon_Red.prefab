@@ -413,9 +413,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eed96d3dcef96cb4e91f7c2194b534ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _type: 0
+  _type: 1
   _muzzle: {fileID: 4000581814333341742}
   _ballPrefab: {fileID: 9150148784569172422, guid: 8afebf3bdb3e3824584844d64ae19f4a, type: 3}
+  _playersToAttack: []
+  _currentTarget: {fileID: 0}
 --- !u!1 &7202222634340849116
 GameObject:
   m_ObjectHideFlags: 0

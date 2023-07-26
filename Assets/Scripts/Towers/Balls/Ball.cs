@@ -1,7 +1,5 @@
-using System;
 using ProtectTheCastle.Game;
 using ProtectTheCastle.Players;
-using ProtectTheCastle.Shared;
 using ProtectTheCastle.Towers.Enums.Balls;
 using UnityEngine;
 
@@ -14,8 +12,11 @@ namespace ProtectTheCastle.Towers.Balls
         
         [SerializeField]
         private EnumBallType _type;
+        [SerializeField]
+        private GameObject _hitAnimation;
         private GameObject _target;
         private float _tagetCenter;
+        private IPlayer _currentTargetPlayerScript;
 
         private void Awake()
         {
@@ -33,14 +34,23 @@ namespace ProtectTheCastle.Towers.Balls
 
         public void HandleDeath()
         {
+            Instantiate(_hitAnimation, transform.position, transform.rotation);
             Destroy(gameObject);
         }
 
         public void SetTarget(GameObject seekingTarget)
         {
+            if (seekingTarget == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             _tagetCenter = seekingTarget.GetComponent<CharacterController>().center.y;
             _target = seekingTarget;
-            Debug.Log(_tagetCenter);
+
+            var playerScript = (_target.GetComponent(typeof(IPlayer)) as IPlayer);
+            _currentTargetPlayerScript = playerScript;
         }
 
         private BallPrefabTypeSettings GetSettings()
@@ -62,18 +72,22 @@ namespace ProtectTheCastle.Towers.Balls
 
         private void MoveTowardsTarget()
         {
-            if (_target != null)
+            if (_target != null && _currentTargetPlayerScript.alive && _currentTargetPlayerScript.moving)
             {
                 var step = speed * Time.deltaTime;
                 var targetPosition = _target.transform.position;
                 var newTargetPosition = new Vector3(targetPosition.x, _tagetCenter, targetPosition.z);
                 transform.position = Vector3.MoveTowards(transform.position, newTargetPosition, step);
             }
+            else if (_currentTargetPlayerScript != null && (!_currentTargetPlayerScript.alive || !_currentTargetPlayerScript.moving))
+            {
+                HandleDeath();
+            }
         }
 
         private void OnCollisionEnter(Collision other)
         {
-            Debug.Log("OnCollisionEnter: " + other.gameObject.name);
+            // Debug.Log("OnCollisionEnter: " + other.gameObject.name);
 
             if (other.gameObject == _target)
             {
@@ -85,7 +99,7 @@ namespace ProtectTheCastle.Towers.Balls
 
         private void OnTriggerEnter(Collider other) 
         {
-            Debug.Log("OnTriggerEnter: " + other.gameObject.name);
+            // Debug.Log("OnTriggerEnter: " + other.gameObject.name);
 
             if (other.gameObject == _target)
             {

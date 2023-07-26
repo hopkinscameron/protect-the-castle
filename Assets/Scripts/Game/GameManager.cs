@@ -159,19 +159,7 @@ namespace ProtectTheCastle.Game
 
         public void EndTurn()
         {
-            Debug.Log(isPlayer1Turn ? "Player 1 turn ended" : "Player 2 turn ended");
-            isPlayer1Turn = !isPlayer1Turn;
-            FocusCharacter(isPlayer1Turn ? _player1[0] : _player2[0]);
-            
-            if (!isPlayer1Turn)
-            {
-                
-                AttemptToMovePlayer();
-            }
-            else
-            {
-                moving = false;
-            }
+            StartCoroutine("PauseBeforeSwitchingPlayers");
         }
 
         public bool EndGame(GameObject winner)
@@ -238,6 +226,24 @@ namespace ProtectTheCastle.Game
 
             // Debug.Log("Players Spawned, Game Ready");
             _gameReady = true;
+        }
+
+        private IEnumerator PauseBeforeSwitchingPlayers()
+        {
+            yield return new WaitForSeconds(2);
+            Debug.Log(isPlayer1Turn ? "Player 1 turn ended" : "Player 2 turn ended");
+            isPlayer1Turn = !isPlayer1Turn;
+            FocusCharacter(isPlayer1Turn ? _player1[0] : _player2[0]);
+            
+            if (!isPlayer1Turn)
+            {
+                yield return new WaitForSeconds(2);
+                AttemptToMovePlayer();
+            }
+            else
+            {
+                moving = false;
+            }
         }
 
         private void AttemptToMovePlayer()

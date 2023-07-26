@@ -51,7 +51,7 @@ namespace ProtectTheCastle.AI
 
         private void MoveAI()
         {
-            _animator.SetFloat(Constants.ANIMATOR_SPEED_NAME, _navMeshAgent.velocity.magnitude);
+            _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             _shouldMove = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
 
             if (!_shouldMove)

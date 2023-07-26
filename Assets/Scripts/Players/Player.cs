@@ -71,14 +71,14 @@ namespace ProtectTheCastle.Players
             }
             else
             {
-                _animator.SetTrigger(Constants.Animations.ANIMATOR_GET_HIT_NAME);
+                _animator.SetTrigger(Constants.Animations.GET_HIT_NAME);
             }
         }
 
         public void HandleDeath()
         {
             alive = false;
-            _animator.SetTrigger(Constants.Animations.ANIMATOR_DIE_NAME);
+            _animator.SetTrigger(Constants.Animations.DIE_NAME);
             StartCoroutine("Die");
         }
 
@@ -138,7 +138,7 @@ namespace ProtectTheCastle.Players
 
         private void MovePlayer()
         {
-            _animator.SetFloat(Constants.Animations.ANIMATOR_SPEED_NAME, _navMeshAgent.velocity.magnitude);
+            _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             moving = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
 
             if (!moving && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
@@ -150,7 +150,7 @@ namespace ProtectTheCastle.Players
                 if ((_player1 && pns.isPlayer1WinCondition) || (!_player1 && pns.isPlayer2WinCondition))
                 {
                     GameManager.Instance.EndGame(gameObject);
-                    _animator.SetTrigger(Constants.Animations.ANIMATOR_VICTORY_NAME);
+                    _animator.SetTrigger(Constants.Animations.VICTORY_NAME);
                     return;
                 }
 

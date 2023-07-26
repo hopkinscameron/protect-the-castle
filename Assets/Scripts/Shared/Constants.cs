@@ -20,11 +20,11 @@ namespace ProtectTheCastle.Shared
 
         public static class Animations
         {
-            public const string ANIMATOR_SPEED_NAME = "Speed";
-            public const string ANIMATOR_ATTACK_NAME = "Attack";
-            public const string ANIMATOR_GET_HIT_NAME = "GetHit";
-            public const string ANIMATOR_DIE_NAME = "Die";
-            public const string ANIMATOR_VICTORY_NAME = "Victory";
+            public const string SPEED_NAME = "Speed";
+            public const string ATTACK_NAME = "Attack";
+            public const string GET_HIT_NAME = "GetHit";
+            public const string DIE_NAME = "Die";
+            public const string VICTORY_NAME = "Victory";
         }
     }
 }

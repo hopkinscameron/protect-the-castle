@@ -83,7 +83,7 @@ namespace ProtectTheCastle.Environment.AISpawns
                 sphere.name = "AI Spawn Sphere " + i;
                 sphere.transform.position = new Vector3(spawn.x, 0.5f, spawn.z);
                 sphere.GetComponent<Renderer>().material.color = Color.cyan;
-                sphere.GetComponent<SphereCollider>().isTrigger = true;
+                sphere.GetComponent<SphereCollider>().enabled = false;
                 return sphere;
             }).ToList();
         }

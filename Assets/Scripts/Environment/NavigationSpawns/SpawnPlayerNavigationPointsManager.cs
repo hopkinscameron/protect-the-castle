@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ProtectTheCastle.Players.Enums;
 using ProtectTheCastle.Shared;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
         public GameObject GetHomeBaseSpawn(GameObject homeBase)
         {
-            if (homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
+            if (homeBase.tag.Equals(Constants.Player1.CASTLE_TAG, StringComparison.OrdinalIgnoreCase))
             {
                 return _common[0];
             }
@@ -49,7 +50,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
             return _common[_common.Count - 1];
         }
 
-        public GameObject GetNextTarget(GameObject homeBase, Vector3 currentPosition)
+        public GameObject GetNextTarget(GameObject homeBase, Vector3 currentPosition, EnumPlayerMoveDirection directionToMove)
         {
             var currentSpawnSystem = _common;
             var currentIndex = GetCurrentIndex(currentSpawnSystem, currentPosition);
@@ -77,10 +78,10 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 return null;
             }
 
-            return GetNextTargetBasedOnCastle(homeBase, currentSpawnSystem, currentIndex);
+            return GetNextTargetBasedOnCastle(homeBase, currentSpawnSystem, currentIndex, directionToMove);
         }
 
-        public GameObject GetNextTarget(GameObject homeBase, GameObject currentTarget)
+        public GameObject GetNextTarget(GameObject homeBase, GameObject currentTarget, EnumPlayerMoveDirection directionToMove)
         {
             var currentSpawnSystem = _common;
             var currentIndex = GetCurrentIndex(currentSpawnSystem, currentTarget);
@@ -107,7 +108,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 return null;
             }
 
-            return GetNextTargetBasedOnCastle(homeBase, currentSpawnSystem, currentIndex);
+            return GetNextTargetBasedOnCastle(homeBase, currentSpawnSystem, currentIndex, directionToMove);
         }
 
         private IReadOnlyList<GameObject> SpawnNavigationPoints(IReadOnlyList<PlayerNavigationSpawnCoordinates> spawns, string positionTitle)
@@ -121,7 +122,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 playerNavigationSpawn.isDecisionSpawn = spawn.isDecisionSpawn;
                 playerNavigationSpawn.isPlayer1WinCondition = positionTitle == "Common" && i == spawns.Count - 1;
                 playerNavigationSpawn.isPlayer2WinCondition = positionTitle == "Common" && i == 0;
-                capsule.GetComponent<CapsuleCollider>().isTrigger = true;
+                capsule.GetComponent<CapsuleCollider>().enabled = false;
                 return capsule;
             }).ToList();
         }
@@ -154,56 +155,109 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
             return -1;
         }
 
-        private GameObject GetNextTargetBasedOnCastle(GameObject homeBase, IReadOnlyList<GameObject> currentSpawnSystem, int currentIndex)
+        private GameObject GetNextTargetBasedOnCastle(GameObject homeBase, IReadOnlyList<GameObject> currentSpawnSystem, int currentIndex, EnumPlayerMoveDirection directionToMove)
         {
-            var isDecisionSpawn = currentSpawnSystem[currentIndex].GetComponent<PlayerNavigationSpawn>().isDecisionSpawn;
-            var nextIndex = -1;
-            var isPlayer1 = homeBase.tag.Equals(Constants.PLAYER_1_CASTLE_TAG, StringComparison.OrdinalIgnoreCase);
+            var isPlayer1 = homeBase.tag.Equals(Constants.Player1.CASTLE_TAG, StringComparison.OrdinalIgnoreCase);
+            var nextIndex = isPlayer1 ? currentIndex + 1 : currentIndex - 1;
+            var nextSpawnSystem = currentSpawnSystem;
 
-            if (isDecisionSpawn)
+            if (nextSpawnSystem == _common)
             {
-                var path = _straight;
-                if (isPlayer1)
-                {
-                    nextIndex = isPlayer1 ? currentIndex + 1 : currentIndex - 1;
-                }
-
-                if (currentSpawnSystem == _common)
-                {
-                    var potentialWinSpawn = currentSpawnSystem[nextIndex];
-                    var pns = potentialWinSpawn.GetComponent<PlayerNavigationSpawn>();
-                    if ((isPlayer1 && pns.isPlayer1WinCondition) || (!isPlayer1 && pns.isPlayer2WinCondition))
-                    {
-                        return potentialWinSpawn;
-                    }
-                }
-
-                var randomDirection = UnityEngine.Random.Range(0, 3);
-                switch (randomDirection)
-                {
-                    case 0:
-                        path = _left;
-                        break;
-                    case 1:
-                        path = _right;
-                        break;
-                }
-
-                if (isPlayer1)
-                {
-                    // TODO: used for testing
-                    return _straight[0];
-                }
                 
-                return path[path.Count - 1];
+                var isDecisionSpawn = (nextSpawnSystem[currentIndex].GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isDecisionSpawn;
+
+                if (isDecisionSpawn)
+                {
+                    if (!isPlayer1)
+                    {
+                        var potentialWinSpawn = nextIndex > -1 ? nextSpawnSystem[nextIndex] : null;
+                        if ((potentialWinSpawn?.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isPlayer2WinCondition == true)
+                        {
+                            return potentialWinSpawn;
+                        }
+
+                        directionToMove = EnumPlayerMoveDirection.Left;
+                        var randomDirection = UnityEngine.Random.Range(0, 3);
+                        switch (randomDirection)
+                        {
+                            case 1:
+                                directionToMove = EnumPlayerMoveDirection.Forward;
+                                break;
+                            case 2:
+                                directionToMove = EnumPlayerMoveDirection.Right;
+                                break;
+                        }
+
+                        // TODO: used for testing
+                        directionToMove = EnumPlayerMoveDirection.Forward;
+                    }
+                    else
+                    {
+                        var potentialWinSpawn = nextIndex < nextSpawnSystem.Count ? nextSpawnSystem[nextIndex] : null;
+                        if ((potentialWinSpawn?.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isPlayer1WinCondition == true)
+                        {
+                            return potentialWinSpawn;
+                        }
+                    }
+
+                    if (directionToMove == EnumPlayerMoveDirection.Unknown)
+                    {
+                        return null;
+                    }
+
+                    if (directionToMove == EnumPlayerMoveDirection.Left)
+                    {
+                        nextSpawnSystem = _left;
+                    }
+                    else if (directionToMove == EnumPlayerMoveDirection.Forward)
+                    {
+                        nextSpawnSystem = _straight;
+                    }
+                    else if (directionToMove == EnumPlayerMoveDirection.Right)
+                    {
+                        nextSpawnSystem = _right;
+                    }
+
+                    nextIndex = isPlayer1 ? 0 : nextSpawnSystem.Count - 1;
+                }
             }
 
             if (isPlayer1)
             {
-                return nextIndex < currentSpawnSystem.Count ? currentSpawnSystem[nextIndex] : null;
+                if (nextIndex == nextSpawnSystem.Count)
+                {
+                    nextSpawnSystem = _common;
+                    for (var x = nextSpawnSystem.Count - 1; x > -1; x--)
+                    {
+                        if ((nextSpawnSystem[x]?.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isDecisionSpawn)
+                        {
+                            nextIndex = x;
+                            break;
+                        }
+                    }
+                }
+
+                return nextSpawnSystem[nextIndex];
+            }
+            else if (!isPlayer1)
+            {
+                if (nextIndex == -1)
+                {
+                    nextSpawnSystem = _common;
+                    for (var x = 0; x < nextSpawnSystem.Count; x++)
+                    {
+                        if ((nextSpawnSystem[x]?.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).isDecisionSpawn)
+                        {
+                            nextIndex = x;
+                            break;
+                        }
+                    }
+                }
+
+                return nextSpawnSystem[nextIndex];
             }
 
-            return nextIndex > -1 ? currentSpawnSystem[nextIndex] : null;
+            return null;
         }
     }
 }

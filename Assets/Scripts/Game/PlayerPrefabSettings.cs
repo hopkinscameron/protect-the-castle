@@ -6,11 +6,11 @@ namespace ProtectTheCastle.Game
     public class PlayerPrefabSettings 
     {
         public PlayerPrefabTypeSettings normal;
-        public PlayerPrefabTypeSettings fire;
-        public PlayerPrefabTypeSettings grass;
-        public PlayerPrefabTypeSettings water;
-        public PlayerPrefabTypeSettings ice;
-        public PlayerPrefabTypeSettings poison;
+        public PlayerPrefabTypeSettings hero;
+        public PlayerPrefabTypeSettings soldier;
+        public PlayerPrefabTypeSettings mercenary;
+        public PlayerPrefabTypeSettings warrior;
+        public PlayerPrefabTypeSettings magic;
     }
 
     [Serializable]

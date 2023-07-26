@@ -14,5 +14,6 @@ namespace ProtectTheCastle.Environment.TowerSpawns
     {
         public float x;
         public float z;
+        public float rotation;
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using ProtectTheCastle.Environment.AISpawns;
+using ProtectTheCastle.Game;
 using ProtectTheCastle.Shared;
 using UnityEngine;
 using UnityEngine.AI;
@@ -31,6 +32,8 @@ namespace ProtectTheCastle.AI
 
         private void FixedUpdate()
         {
+            if (!GameManager.Instance.gameInProgress) return;
+            
             if (_shouldMove && _target)
             {
                 MoveAI();

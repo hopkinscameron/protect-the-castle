@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Cinemachine;
 using ProtectTheCastle.Environment.NavigationSpawns;
 using ProtectTheCastle.Players;
+using ProtectTheCastle.Players.Enums;
 using ProtectTheCastle.Shared;
 using UnityEngine;
 
@@ -26,10 +27,10 @@ namespace ProtectTheCastle.Game
         private GameObject _camera;
 
         // TODO: remove me, used for testing
-        private GameObject _player1LastCharacterMoved;
         private GameObject _player2LastCharacterMoved;
         private int attemptsToMove = 0;
         private bool moving = false;
+        private EnumPlayerMoveDirection directionClicked;
 
         private void Awake()
         {
@@ -47,7 +48,8 @@ namespace ProtectTheCastle.Game
 
         private void Update()
         {
-            if(Input.GetButtonUp("Jump") && isPlayer1Turn && !moving)
+            directionClicked = GetPlayerMoveDirectionBasedOnInput();
+            if(directionClicked != EnumPlayerMoveDirection.Unknown && isPlayer1Turn && !moving)
             {
                 moving = true;
                 AttemptToMovePlayer();
@@ -130,25 +132,21 @@ namespace ProtectTheCastle.Game
             if (!gameInProgress || !_gameReady || characterToMove == null
                 || (!isPlayer1Turn && attemptsToMove >= (_player2.Count * 2))) return;
 
-            if ((isPlayer1Turn && characterToMove.tag.Equals(Constants.PLAYER_1_TAG, StringComparison.OrdinalIgnoreCase))
-                || (!isPlayer1Turn && characterToMove.tag.Equals(Constants.PLAYER_2_TAG, StringComparison.OrdinalIgnoreCase)))
+            if ((isPlayer1Turn && characterToMove.tag.Equals(Constants.Player1.TAG, StringComparison.OrdinalIgnoreCase))
+                || (!isPlayer1Turn && characterToMove.tag.Equals(Constants.Player2.TAG, StringComparison.OrdinalIgnoreCase)))
             {
                 if (attemptsToMove == 0)
                 {
                     Debug.Log(isPlayer1Turn ? "Player 1 turn started" : "Player 2 turn started");
                 }
 
-                if (isPlayer1Turn)
-                {
-                    _player1LastCharacterMoved = characterToMove;
-                }
-                else
+                if (!isPlayer1Turn)
                 {
                     _player2LastCharacterMoved = characterToMove;
                 }
 
-                var couldMove = characterToMove.GetComponent<Player>().Move();
-                if (!couldMove)
+                var couldMove = (characterToMove.GetComponent(typeof(IPlayer)) as IPlayer).Move(directionClicked);
+                if (!couldMove && !isPlayer1Turn)
                 {
                     attemptsToMove++;
                     AttemptToMovePlayer();
@@ -194,8 +192,8 @@ namespace ProtectTheCastle.Game
             var player1ForwardAngle = transform.rotation;
             player1ForwardAngle.eulerAngles = new Vector3(0, 0, 0);
 
-            var player1Castle = GameObject.FindGameObjectWithTag(Constants.PLAYER_1_CASTLE_TAG);
-            var player2Castle = GameObject.FindGameObjectWithTag(Constants.PLAYER_2_CASTLE_TAG);
+            var player1Castle = GameObject.FindGameObjectWithTag(Constants.Player1.CASTLE_TAG);
+            var player2Castle = GameObject.FindGameObjectWithTag(Constants.Player2.CASTLE_TAG);
             var player1HomeBaseSpawn = SpawnPlayerNavigationPoints.Instance.GetHomeBaseSpawn(player1Castle);
             var player2HomeBaseSpawn = SpawnPlayerNavigationPoints.Instance.GetHomeBaseSpawn(player2Castle);
             _player1 = new List<GameObject> {
@@ -228,14 +226,14 @@ namespace ProtectTheCastle.Game
 
             foreach(var player1GameObject in _player1)
             {
-                player1GameObject.GetComponent<Player>().SetHome(player1Castle);
-                player1GameObject.tag = Constants.PLAYER_1_TAG;
+                (player1GameObject.GetComponent(typeof(IPlayer)) as IPlayer).SetHome(player1Castle);
+                player1GameObject.tag = Constants.Player1.TAG;
             }
 
             foreach(var player2GameObject in _player2)
             {
-                player2GameObject.GetComponent<Player>().SetHome(player2Castle);
-                player2GameObject.tag = Constants.PLAYER_2_TAG;
+                (player2GameObject.GetComponent(typeof(IPlayer)) as IPlayer).SetHome(player2Castle);
+                player2GameObject.tag = Constants.Player2.TAG;
             }
 
             // Debug.Log("Players Spawned, Game Ready");
@@ -273,6 +271,27 @@ namespace ProtectTheCastle.Game
         {
             _camera.GetComponent<CinemachineVirtualCamera>().Follow = characterToFocus.transform;
             _camera.GetComponent<CinemachineVirtualCamera>().LookAt = characterToFocus.transform;
+        }
+
+        private EnumPlayerMoveDirection GetPlayerMoveDirectionBasedOnInput()
+        {
+            if (Input.GetKeyUp("left"))
+            {
+                // Debug.Log("Selected to move left");
+                return EnumPlayerMoveDirection.Left;
+            }
+            else if (Input.GetKeyUp("right"))
+            {
+                // Debug.Log("Selected to move right");
+                return EnumPlayerMoveDirection.Right;
+            }
+            else if (Input.GetKeyUp("up"))
+            {
+                // Debug.Log("Selected to move forward");
+                return EnumPlayerMoveDirection.Forward;
+            }
+
+            return EnumPlayerMoveDirection.Unknown;
         }
     }
 }

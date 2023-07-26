@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace ProtectTheCastle.Environment.NavigationSpawns
 {
-    public class PlayerNavigationSpawn : MonoBehaviour, IPlayerNavigationSpawnPoint
+    public class PlayerNavigationSpawn : MonoBehaviour, IPlayerNavigationSpawn
     {
         public GameObject occupiedBy { get; private set; }
         public bool isDecisionSpawn { get; set; }
@@ -12,8 +12,8 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
         private void OnTriggerEnter(Collider collider)
         {
-            if (collider.gameObject.tag.Equals(Constants.PLAYER_1_TAG)
-                || collider.gameObject.tag.Equals(Constants.PLAYER_2_TAG))
+            if (collider.gameObject.tag.Equals(Constants.Player1.TAG)
+                || collider.gameObject.tag.Equals(Constants.Player2.TAG))
             {
                 // Debug.LogWarning(gameObject.name + " is occupied by " + collider.gameObject.name);
                 occupiedBy = collider.gameObject;
@@ -22,8 +22,8 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
 
         private void OnTriggerExit(Collider collider)
         {
-            if (collider.gameObject.tag.Equals(Constants.PLAYER_1_TAG)
-                || collider.gameObject.tag.Equals(Constants.PLAYER_2_TAG))
+            if (collider.gameObject.tag.Equals(Constants.Player1.TAG)
+                || collider.gameObject.tag.Equals(Constants.Player2.TAG))
             {
                 // Debug.LogWarning(gameObject.name + " is no longer occupied by " + collider.gameObject.name);
                 occupiedBy = null;

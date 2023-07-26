@@ -1,4 +1,4 @@
-namespace ProtectTheCastle.Tower.Enums.Balls
+namespace ProtectTheCastle.Towers.Enums.Balls
 {
     public enum EnumBallType
     {

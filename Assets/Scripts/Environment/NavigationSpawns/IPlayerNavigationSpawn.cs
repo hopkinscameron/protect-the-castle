@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace ProtectTheCastle.Environment.NavigationSpawns
 {
-    public interface IPlayerNavigationSpawnPoint
+    public interface IPlayerNavigationSpawn
     {
         GameObject occupiedBy { get; }
         bool isDecisionSpawn { get; set; }

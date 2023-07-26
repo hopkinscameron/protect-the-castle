@@ -1,3 +1,4 @@
+using ProtectTheCastle.Players.Enums;
 using UnityEngine;
 
 namespace ProtectTheCastle.Environment.NavigationSpawns
@@ -6,7 +7,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
     {
         void Load();
         GameObject GetHomeBaseSpawn(GameObject homeBase);
-        GameObject GetNextTarget(GameObject homeBase, Vector3 currentPosition);
-        GameObject GetNextTarget(GameObject homeBase, GameObject currentTarget);
+        GameObject GetNextTarget(GameObject homeBase, Vector3 currentPosition, EnumPlayerMoveDirection directionToMove);
+        GameObject GetNextTarget(GameObject homeBase, GameObject currentTarget, EnumPlayerMoveDirection directionToMove);
     }
 }

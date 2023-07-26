@@ -1,7 +1,10 @@
+using System.Collections.Generic;
+using System.Linq;
 using ProtectTheCastle.Enums.Towers;
 using ProtectTheCastle.Game;
+using ProtectTheCastle.Players;
 using ProtectTheCastle.Shared;
-using ProtectTheCastle.Tower.Balls;
+using ProtectTheCastle.Towers.Balls;
 using UnityEngine;
 
 namespace ProtectTheCastle.Towers
@@ -16,23 +19,20 @@ namespace ProtectTheCastle.Towers
         [SerializeField]
         private EnumTowerType _type;
         [SerializeField]
+        private GameObject _muzzle;
+        [SerializeField]
         private GameObject _ballPrefab;
-        private GameObject _player;
+        [SerializeField]
+        private List<GameObject> _playersToAttack;
+        [SerializeField]
+        private GameObject _currentTarget;
+        private IPlayer _currentTargetPlayerScript;
         private float _timeSinceLastShot;
         private bool _isPlayerTower;
 
         private void Awake()
         {
-            _isPlayerTower = gameObject.tag.Equals(Constants.PLAYER_1_TOWER_TAG, System.StringComparison.OrdinalIgnoreCase);
-
-            if (_isPlayerTower)
-            {
-                _player = GameObject.FindGameObjectWithTag(Constants.PLAYER_2_TAG);
-            }
-            else
-            {
-                _player = GameObject.FindGameObjectWithTag(Constants.PLAYER_1_TAG);
-            }
+            _isPlayerTower = gameObject.tag.Equals(Constants.Player1.CASTLE_TAG, System.StringComparison.OrdinalIgnoreCase);
         }
 
         private void Start()
@@ -46,27 +46,9 @@ namespace ProtectTheCastle.Towers
 
         private void FixedUpdate()
         {
-            health = health - healthDecreaseAmount * Time.deltaTime;
-            if (health <= 0)
-            {
-                HandleDeath();
-            }
-
-            if (_player == null)
-            {
-                return;
-            }
-
-            if (Vector3.Distance(transform.position, _player.transform.position) < minEngageDistance)
-            {
-                if (_timeSinceLastShot <= Time.time)
-                {
-                    GameObject spawnedBall = Instantiate(_ballPrefab, transform.position, transform.rotation);
-                    IBall spawnedBallMovementScript = spawnedBall.GetComponent<Ball>();
-                    spawnedBallMovementScript.SetTarget(_player);
-                    _timeSinceLastShot = Time.time + coolDown;
-                }
-            }
+            if (!GameManager.Instance.gameInProgress) return;
+            SetPlayers();
+            SearchOrEngage();
         }
 
         public void HandleDeath()
@@ -89,6 +71,70 @@ namespace ProtectTheCastle.Towers
                 default:
                     return GameSettingsManager.Instance.towerPrefabSettings.normal;
             }
+        }
+
+        private void SetPlayers()
+        {
+            if (_playersToAttack.Count == 0 && _isPlayerTower)
+            {
+                _playersToAttack = GameObject.FindGameObjectsWithTag(Constants.Player2.TAG).ToList();
+            }
+            else if (_playersToAttack.Count == 0)
+            {
+                _playersToAttack = GameObject.FindGameObjectsWithTag(Constants.Player1.TAG).ToList();
+            }
+        }
+
+        private void SearchOrEngage()
+        {
+            if (_currentTarget != null)
+            {
+                if (IsTargetWithinDistance(_currentTarget) && _currentTargetPlayerScript.alive && _currentTargetPlayerScript.moving)
+                {
+                    health = health - healthDecreaseAmount * Time.deltaTime;
+                    if (health <= 0)
+                    {
+                        HandleDeath();
+                    }
+                    else if (_timeSinceLastShot <= Time.time)
+                    {
+                        var spawnedBall = Instantiate(_ballPrefab, _muzzle.transform.position, _muzzle.transform.rotation);
+                        (spawnedBall.GetComponent(typeof(IBall)) as IBall).SetTarget(_currentTarget);
+                        _timeSinceLastShot = Time.time + coolDown;
+                    }
+                }
+                else
+                {
+                    _currentTarget = null;
+                }
+            }
+            else
+            {
+                GetPlayerTarget();
+            }
+        }
+
+        private void GetPlayerTarget()
+        {
+            if (_currentTarget != null) return;
+
+            foreach (var player in _playersToAttack)
+            {
+                if (player != null && IsTargetWithinDistance(player))
+                {
+                    var playerScript = (player.GetComponent(typeof(IPlayer)) as IPlayer);
+                    if (playerScript.alive && playerScript.moving) 
+                    {
+                        _currentTargetPlayerScript = playerScript;
+                        _currentTarget = player;
+                    }
+                }
+            }
+        }
+
+        private bool IsTargetWithinDistance(GameObject target)
+        {
+            return Vector3.Distance(_muzzle.transform.position, target.transform.position) < minEngageDistance;
         }
     }
 }

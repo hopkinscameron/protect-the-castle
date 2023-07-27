@@ -10,8 +10,10 @@ namespace ProtectTheCastle.Players
         float speed { get; }
         bool alive { get; }
         bool moving { get; }
+        bool inBattle { get; }
 
-        void Attack(GameObject playerToAttack);
+        void BeginBattle();
+        void Attack();
         void Attacked(float amount);
         void HandleDeath();
         bool Move(EnumPlayerMoveDirection direction);

@@ -10,6 +10,7 @@ namespace ProtectTheCastle.Game
         bool isPlayer1Turn { get; }
 
         bool StartGame();
+        bool PauseOrResumeGame();
         bool StartPickingPlayers();
         bool FinishPickingPlayers();
         bool StartPickingTowers();

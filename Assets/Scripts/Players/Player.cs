@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using ProtectTheCastle.Environment.NavigationSpawns;
 using ProtectTheCastle.Game;
 using ProtectTheCastle.Players.Enums;
@@ -18,19 +19,22 @@ namespace ProtectTheCastle.Players
         public float speed { get; private set; }
         public bool alive { get; private set; } = true;
         public bool moving { get; private set; }
+        public bool inBattle { get; private set; }
         public float remainingDistance;
+        public float navVelocity;
 
         [SerializeField]
         private EnumPlayerType _type;
         private NavMeshAgent _navMeshAgent;
         private Animator _animator;
         private GameObject _homeCastle;
-        [SerializeField]
         private GameObject _lastTarget;
-        [SerializeField]
         private GameObject _nextTarget;
+        private IPlayerNavigationSpawn _nextTargetNavSpawn;
         private INavMeshAgentHelper _navMeshAgentHelper;
         private bool _player1;
+        [SerializeField]
+        private List<GameObject> battleOpponents = new List<GameObject>();
 
         private void Awake()
         {
@@ -58,9 +62,27 @@ namespace ProtectTheCastle.Players
             }
         }
 
-        public void Attack(GameObject playerToAttack)
+        public void BeginBattle()
         {
-            throw new System.NotImplementedException();
+            inBattle = true;
+            var _currentTargetNavSpawn = _lastTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn;
+            foreach (var potentialTarget in _currentTargetNavSpawn.occupiedBy)
+            {
+                if (_player1 && potentialTarget.tag.Equals(Constants.Player2.TAG))
+                {
+                    battleOpponents.Add(potentialTarget);
+                }
+                else if (!_player1 && potentialTarget.tag.Equals(Constants.Player1.TAG))
+                {
+                    battleOpponents.Add(potentialTarget);
+                }
+            }
+        }
+
+        public void Attack()
+        {
+            if (battleOpponents.Count == 0) return;
+            StartCoroutine("AttackOpponent");
         }
 
         public void Attacked(float amount)
@@ -88,7 +110,7 @@ namespace ProtectTheCastle.Players
 
         public bool Move(EnumPlayerMoveDirection direction)
         {
-            if (!alive) return false;
+            if (!alive || inBattle) return false;
 
             var previousTarget = _nextTarget;
             _nextTarget = _nextTarget == null
@@ -100,17 +122,8 @@ namespace ProtectTheCastle.Players
                 return false;
             }
 
-            var occupiedBy = (_nextTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn).occupiedBy;
-            if (occupiedBy != null)
-            {
-                Debug.Log(gameObject.name + " could not move because the target "
-                    + _nextTarget.name + " at (" + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z
-                    + ") is already occupied by " + occupiedBy.name);
-                _nextTarget = previousTarget;
-                return false;
-            }
-
-            Debug.Log(gameObject.name + " is moving towards " + _nextTarget.name + " at " + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z);
+            // Debug.Log(gameObject.name + " is moving towards " + _nextTarget.name + " at " + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z);
+            _nextTargetNavSpawn = _nextTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn;
             moving = _navMeshAgent.SetDestination(_nextTarget.transform.position);
             return moving;
         }
@@ -145,13 +158,14 @@ namespace ProtectTheCastle.Players
             _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             moving = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
             remainingDistance = _navMeshAgent.remainingDistance;
+            navVelocity = _navMeshAgent.velocity.magnitude;
 
             if (!moving && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
             {
                 _lastTarget = _nextTarget;
                 _nextTarget = null;
 
-                var pns = (_lastTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn);
+                var pns = _lastTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn;
                 if ((_player1 && pns.isPlayer1WinCondition) || (!_player1 && pns.isPlayer2WinCondition))
                 {
                     GameManager.Instance.EndGame(gameObject);
@@ -159,8 +173,54 @@ namespace ProtectTheCastle.Players
                     return;
                 }
 
+                if (_nextTargetNavSpawn?.occupiedBy?.Count > 0)
+                {
+                    var hasEnemy = false;
+                    foreach (var playerAtNavPoint in _nextTargetNavSpawn.occupiedBy)
+                    {
+                        if (playerAtNavPoint == gameObject) continue;
+
+                        var playerScript = playerAtNavPoint.GetComponent(typeof(IPlayer)) as IPlayer;
+                        if ((_player1 && playerAtNavPoint.tag.Equals(Constants.Player2.TAG))
+                            || (!_player1 && playerAtNavPoint.tag.Equals(Constants.Player1.TAG)))
+                        {
+                            hasEnemy = true;
+                            playerScript.BeginBattle();
+                        }
+                    }
+
+                    if (hasEnemy)
+                    {
+                        BeginBattle();
+                    }
+                }
+
+                _nextTargetNavSpawn = null;
                 GameManager.Instance.EndTurn();
             }
+        }
+
+        private IEnumerator AttackOpponent()
+        {
+            var opponent = battleOpponents[0];
+            var playerScript = opponent.GetComponent(typeof(IPlayer)) as IPlayer;
+            _animator.SetTrigger(Constants.Animations.ATTACK_NAME);
+
+            yield return new WaitForSeconds(0.5f);
+
+            playerScript.Attacked(damage);
+            
+            if (!playerScript.alive)
+            {
+                battleOpponents.Remove(opponent);
+
+                if (battleOpponents.Count == 0)
+                {
+                    inBattle = false;
+                }
+            }
+
+            GameManager.Instance.EndTurn();
         }
 
         private IEnumerator Die()

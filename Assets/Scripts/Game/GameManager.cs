@@ -6,6 +6,7 @@ using ProtectTheCastle.Environment.NavigationSpawns;
 using ProtectTheCastle.Players;
 using ProtectTheCastle.Players.Enums;
 using ProtectTheCastle.Shared;
+using ProtectTheCastle.UI;
 using UnityEngine;
 
 namespace ProtectTheCastle.Game
@@ -14,6 +15,7 @@ namespace ProtectTheCastle.Game
     {
         public static GameManager Instance { get; private set; }
 
+        public bool gameStarted { get; private set; }
         public bool gameInProgress { get; private set; }
         public bool pickingPlayers { get; private set; }
         public bool pickingTowers { get; private set; }
@@ -24,7 +26,7 @@ namespace ProtectTheCastle.Game
         private bool _gameReady;
         private IReadOnlyList<GameObject> _player1;
         private IReadOnlyList<GameObject> _player2;
-        private GameObject _camera;
+        private CinemachineVirtualCamera _camera;
 
         // TODO: remove me, used for testing
         private GameObject _player2LastCharacterMoved;
@@ -43,11 +45,20 @@ namespace ProtectTheCastle.Game
                 Instance = this; 
             }
 
-            _camera = GameObject.FindGameObjectWithTag(Constants.VIRTUAL_CAMERA_TAG);
+            _camera = GameObject.FindGameObjectWithTag(Constants.VIRTUAL_CAMERA_TAG).GetComponent<CinemachineVirtualCamera>();
         }
 
         private void Update()
         {
+            if (!gameStarted) return;
+
+            if (Input.GetKeyUp(KeyCode.Escape))
+            {
+                PauseOrResumeGame();
+            }
+
+            if (!gameInProgress) return;
+
             directionClicked = GetPlayerMoveDirectionBasedOnInput();
             if(directionClicked != EnumPlayerMoveDirection.Unknown && isPlayer1Turn && !moving)
             {
@@ -58,11 +69,12 @@ namespace ProtectTheCastle.Game
 
         public bool StartGame()
         {
-            if (!gameInProgress)
+            if (!gameStarted)
             {
                 // Debug.Log("Game Started");
                 isPlayer1Turn = true; // UnityEngine.Random.Range(0, 2) == 0;
-                gameInProgress = true;
+                gameStarted = true;
+                PauseOrResumeGame();
                 StartPickingPlayers();
 
                 // TODO: remove me, used for testing
@@ -73,6 +85,15 @@ namespace ProtectTheCastle.Game
 
                 FocusCharacter(_player1[0]);
             }
+
+            return gameStarted;
+        }
+
+        public bool PauseOrResumeGame()
+        {
+            gameInProgress = !gameInProgress;
+            UIManager.Instance.PauseGame(!gameInProgress);
+            Time.timeScale = !gameInProgress ? 0 : 1;
 
             return gameInProgress;
         }
@@ -137,7 +158,7 @@ namespace ProtectTheCastle.Game
             {
                 if (attemptsToMove == 0)
                 {
-                    Debug.Log(isPlayer1Turn ? "Player 1 turn started" : "Player 2 turn started");
+                    // Debug.Log(isPlayer1Turn ? "Player 1 turn started" : "Player 2 turn started");
                 }
 
                 if (!isPlayer1Turn)
@@ -145,15 +166,23 @@ namespace ProtectTheCastle.Game
                     _player2LastCharacterMoved = characterToMove;
                 }
 
-                var couldMove = (characterToMove.GetComponent(typeof(IPlayer)) as IPlayer).Move(directionClicked);
-                if (!couldMove && !isPlayer1Turn)
+                var playerScript = characterToMove.GetComponent(typeof(IPlayer)) as IPlayer;
+                if (playerScript.inBattle)
                 {
-                    attemptsToMove++;
-                    AttemptToMovePlayer();
-                    return;
+                    playerScript.Attack();
                 }
+                else
+                {
+                    var couldMove = playerScript.Move(directionClicked);
+                    if (!couldMove && !isPlayer1Turn)
+                    {
+                        attemptsToMove++;
+                        AttemptToMovePlayer();
+                        return;
+                    }
 
-                attemptsToMove = 0;
+                    attemptsToMove = 0;
+                }
             }
         }
 
@@ -166,8 +195,8 @@ namespace ProtectTheCastle.Game
         {
             if (gameInProgress)
             {
+                gameStarted = false;
                 gameInProgress = false;
-                Debug.Log("The winner is " + winner.tag);
             }
 
             return gameInProgress;
@@ -231,7 +260,7 @@ namespace ProtectTheCastle.Game
         private IEnumerator PauseBeforeSwitchingPlayers()
         {
             yield return new WaitForSeconds(2);
-            Debug.Log(isPlayer1Turn ? "Player 1 turn ended" : "Player 2 turn ended");
+            // Debug.Log(isPlayer1Turn ? "Player 1 turn ended" : "Player 2 turn ended");
             isPlayer1Turn = !isPlayer1Turn;
             FocusCharacter(isPlayer1Turn ? _player1[0] : _player2[0]);
             
@@ -275,8 +304,8 @@ namespace ProtectTheCastle.Game
 
         private void FocusCharacter(GameObject characterToFocus)
         {
-            _camera.GetComponent<CinemachineVirtualCamera>().Follow = characterToFocus.transform;
-            _camera.GetComponent<CinemachineVirtualCamera>().LookAt = characterToFocus.transform;
+            _camera.Follow = characterToFocus.transform;
+            _camera.LookAt = characterToFocus.transform;
         }
 
         private EnumPlayerMoveDirection GetPlayerMoveDirectionBasedOnInput()

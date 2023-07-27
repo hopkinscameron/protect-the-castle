@@ -122,7 +122,7 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 playerNavigationSpawn.isDecisionSpawn = spawn.isDecisionSpawn;
                 playerNavigationSpawn.isPlayer1WinCondition = positionTitle == "Common" && i == spawns.Count - 1;
                 playerNavigationSpawn.isPlayer2WinCondition = positionTitle == "Common" && i == 0;
-                capsule.GetComponent<CapsuleCollider>().enabled = false;
+                capsule.GetComponent<CapsuleCollider>().isTrigger = true;
                 return capsule;
             }).ToList();
         }

@@ -38,33 +38,32 @@ namespace ProtectTheCastle.AI
             {
                 MoveAI();
             }
+            else if (!_shouldMove)
+            {
+                _shouldMove = true;
+                StartCoroutine(IdleAI());
+            }
         }
 
-        private void StartMovement()
+        private void SetTarget()
         {
             _target = _target == null
                 ? AISpawnManager.Instance.GetNextTarget(transform.position)
                 : AISpawnManager.Instance.GetNextTarget(_target);
             _navMeshAgent.destination = _target.transform.position;
-            _shouldMove = true;
         }
 
         private void MoveAI()
         {
             _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             _shouldMove = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
-
-            if (!_shouldMove)
-            {
-                StartCoroutine(IdleAI());
-            }
         }
 
         private IEnumerator IdleAI()
         {
             var waitForSeconds = Random.Range(1, 15);
-            yield return new WaitForSeconds(waitForSeconds);
-            StartMovement();
+            yield return new WaitForSeconds(0);
+            SetTarget();
         }
     }
 }

@@ -45,8 +45,6 @@ namespace ProtectTheCastle.Game
 
             contents = (TextAsset) Resources.Load("Settings/tower", typeof(TextAsset));
             towerPrefabSettings = JsonUtility.FromJson<TowerPrefabSettings>(contents.text);
-
-            GameManager.Instance.StartGame();
         }
     }
 }

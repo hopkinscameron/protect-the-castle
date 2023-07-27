@@ -3,6 +3,7 @@ namespace ProtectTheCastle.Shared
     public static class Constants
     {
         public const string VIRTUAL_CAMERA_TAG = "Virtual Camera";
+        public const string NAVIGATION_POINT_TAG = "Navigation Point";
         
         public static class Player1
         {

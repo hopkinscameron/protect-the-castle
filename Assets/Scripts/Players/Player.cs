@@ -33,7 +33,8 @@ namespace ProtectTheCastle.Players
         private INavMeshAgentHelper _navMeshAgentHelper;
         private bool _player1;
         private List<GameObject> _battleOpponents = new List<GameObject>();
-        private IHealthBar _healthBar;
+        private GameObject _healthBar;
+        private IHealthBar _healthBarScript;
         private float _maxHealth;
 
         private void Awake()
@@ -41,7 +42,9 @@ namespace ProtectTheCastle.Players
             _navMeshAgent = GetComponent<NavMeshAgent>();
             _animator = GetComponent<Animator>();
             _navMeshAgentHelper = new NavMeshAgentHelper();
-            _healthBar = GetComponentInChildren(typeof(IHealthBar)) as IHealthBar;
+            _healthBar = transform.Find(Constants.HEALTH_BAR_CANVAS_NAME).Find(Constants.HEALTH_BAR_NAME).gameObject;
+            _healthBarScript = _healthBar.GetComponent(typeof(IHealthBar)) as IHealthBar;
+            _healthBar.SetActive(false);
         }
 
         private void Start()
@@ -52,7 +55,7 @@ namespace ProtectTheCastle.Players
             speed = settings.speed;
             _navMeshAgent.speed = speed;
             _maxHealth = settings.health;
-            _healthBar.SetHealth(_maxHealth, health);
+            _healthBarScript.SetHealth(_maxHealth, health);
         }
 
         private void FixedUpdate()
@@ -61,7 +64,16 @@ namespace ProtectTheCastle.Players
 
             if (moving && _nextTarget)
             {
+                if (!_healthBar.activeSelf)
+                {
+                    _healthBar.SetActive(true);
+                }
+
                 MovePlayer();
+            }
+            else if (_healthBar.activeSelf)
+            {
+                _healthBar.SetActive(false);
             }
         }
 
@@ -91,7 +103,7 @@ namespace ProtectTheCastle.Players
         public void Attacked(float amount)
         {
             health = health - amount;
-            _healthBar.SetHealth(_maxHealth, health);
+            _healthBarScript.SetHealth(_maxHealth, health);
 
             if (health <= 0)
             {

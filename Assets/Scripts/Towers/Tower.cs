@@ -31,13 +31,16 @@ namespace ProtectTheCastle.Towers
         private IPlayer _currentTargetPlayerScript;
         private float _timeSinceLastShot;
         private bool _isPlayerTower;
-        private IHealthBar _healthBar;
+        private GameObject _healthBar;
+        private IHealthBar _healthBarScript;
         private float _maxHealth;
 
         private void Awake()
         {
             _isPlayerTower = gameObject.tag.Equals(Constants.Player1.TOWER_TAG, System.StringComparison.OrdinalIgnoreCase);
-            _healthBar = GetComponentInChildren(typeof(IHealthBar)) as IHealthBar;
+            _healthBar = transform.Find(Constants.HEALTH_BAR_CANVAS_NAME).Find(Constants.HEALTH_BAR_NAME).gameObject;
+            _healthBarScript = _healthBar.GetComponent(typeof(IHealthBar)) as IHealthBar;
+            _healthBar.SetActive(false);
         }
 
         private void Start()
@@ -48,7 +51,7 @@ namespace ProtectTheCastle.Towers
             healthDecreaseAmount = settings.healthDecreaseAmount;
             minEngageDistance = settings.minEngageDistance;
             _maxHealth = settings.health;
-            _healthBar.SetHealth(_maxHealth, health);
+            _healthBarScript.SetHealth(_maxHealth, health);
         }
 
         private void FixedUpdate()
@@ -98,8 +101,13 @@ namespace ProtectTheCastle.Towers
             {
                 if (IsTargetWithinDistance(_currentTarget) && _currentTargetPlayerScript.alive && _currentTargetPlayerScript.moving)
                 {
+                    if (!_healthBar.activeSelf)
+                    {
+                        _healthBar.SetActive(true);
+                    }
+
                     health = health - healthDecreaseAmount * Time.deltaTime;
-                    _healthBar.SetHealth(_maxHealth, health);
+                    _healthBarScript.SetHealth(_maxHealth, health);
                     if (health <= 0)
                     {
                         HandleDeath();
@@ -112,6 +120,7 @@ namespace ProtectTheCastle.Towers
                 else
                 {
                     _currentTarget = null;
+                    _healthBar.SetActive(false);
                 }
             }
             else

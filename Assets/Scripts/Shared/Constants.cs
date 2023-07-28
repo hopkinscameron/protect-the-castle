@@ -4,6 +4,8 @@ namespace ProtectTheCastle.Shared
     {
         public const string VIRTUAL_CAMERA_TAG = "Virtual Camera";
         public const string NAVIGATION_POINT_TAG = "Navigation Point";
+        public const string HEALTH_BAR_CANVAS_NAME = "Health Bar Canvas";
+        public const string HEALTH_BAR_NAME = "HealthBar";
         
         public static class Player1
         {

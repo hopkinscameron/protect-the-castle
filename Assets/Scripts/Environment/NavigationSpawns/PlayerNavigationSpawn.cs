@@ -17,7 +17,6 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 || collider.gameObject.tag.Equals(Constants.Player2.TAG))
             {
                 occupiedBy.Add(collider.gameObject);
-                // Debug.LogWarning(gameObject.name + " is occupied by " + collider.gameObject.name + " - " + occupiedBy.Count);
             }
         }
 
@@ -27,7 +26,6 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
                 || collider.gameObject.tag.Equals(Constants.Player2.TAG))
             {
                 occupiedBy.Remove(collider.gameObject);
-                // Debug.LogWarning(gameObject.name + " is no longer occupied by " + collider.gameObject.name + " - " + occupiedBy.Count);
             }
         }
     }

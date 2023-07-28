@@ -88,7 +88,6 @@ namespace ProtectTheCastle.Towers.Balls
 
         private void OnCollisionEnter(Collision other)
         {
-            // Debug.Log("OnCollisionEnter: " + other.gameObject.name);
             if (other.gameObject.tag.Equals(Constants.NAVIGATION_POINT_TAG)) return;
 
             if (other.gameObject == _target)
@@ -101,7 +100,6 @@ namespace ProtectTheCastle.Towers.Balls
 
         private void OnTriggerEnter(Collider other) 
         {
-            // Debug.Log("OnTriggerEnter: " + other.gameObject.name);
             if (other.gameObject.tag.Equals(Constants.NAVIGATION_POINT_TAG)) return;
 
             if (other.gameObject == _target)

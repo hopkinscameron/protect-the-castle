@@ -16,6 +16,7 @@ namespace ProtectTheCastle.Players
         void Attack();
         void Attacked(float amount);
         void HandleDeath();
+        void RemoveBattleOpponent(GameObject opponent);
         bool Move(EnumPlayerMoveDirection direction);
         void SetHome(GameObject homeBase);
     }

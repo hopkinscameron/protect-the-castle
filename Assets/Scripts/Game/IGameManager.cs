@@ -17,8 +17,9 @@ namespace ProtectTheCastle.Game
         bool StartPickingTowers();
         bool FinishPickingTowers();
         void DirectionClicked(EnumPlayerMoveDirection direction);
-        void MovePlayer(GameObject characterToMove, EnumPlayerMoveDirection directionClicked);
+        void AttackClicked();
         void EndTurn();
+        void PlayerDied(GameObject player);
         bool EndGame(GameObject winner);
     }
 }

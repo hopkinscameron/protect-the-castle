@@ -71,7 +71,11 @@ namespace ProtectTheCastle.Players
 
                 MovePlayer();
             }
-            else if (_healthBar.activeSelf)
+            else if (inBattle && !_healthBar.activeSelf)
+            {
+                _healthBar.SetActive(true);
+            }
+            else if (!inBattle)
             {
                 _healthBar.SetActive(false);
             }
@@ -120,8 +124,34 @@ namespace ProtectTheCastle.Players
             alive = false;
             moving = false;
             _navMeshAgent.isStopped = true;
+            _healthBar.SetActive(false);
             _animator.SetTrigger(Constants.Animations.DIE_NAME);
+
+            var opponentsToRemove = new List<GameObject>();
+            foreach (var opponent in _battleOpponents)
+            {
+                var playerScript = opponent.GetComponent(typeof(IPlayer)) as IPlayer;
+                playerScript.RemoveBattleOpponent(gameObject);
+                opponentsToRemove.Add(opponent);
+            }
+
+            foreach (var opponent in opponentsToRemove)
+            {
+                RemoveBattleOpponent(opponent);
+            }
+
+            GameManager.Instance.PlayerDied(gameObject);
             StartCoroutine("Die");
+        }
+
+        public void RemoveBattleOpponent(GameObject opponent)
+        {
+            _battleOpponents.Remove(opponent);
+
+            if (_battleOpponents.Count == 0)
+            {
+                inBattle = false;
+            }
         }
 
         public bool Move(EnumPlayerMoveDirection direction)
@@ -138,7 +168,6 @@ namespace ProtectTheCastle.Players
                 return false;
             }
 
-            // Debug.Log(gameObject.name + " is moving towards " + _nextTarget.name + " at " + _nextTarget.transform.position.x + "," + _nextTarget.transform.position.z);
             _nextTargetNavSpawn = _nextTarget.GetComponent(typeof(IPlayerNavigationSpawn)) as IPlayerNavigationSpawn;
             moving = _navMeshAgent.SetDestination(_nextTarget.transform.position);
             return moving;
@@ -226,12 +255,7 @@ namespace ProtectTheCastle.Players
             
             if (!playerScript.alive)
             {
-                _battleOpponents.Remove(opponent);
-
-                if (_battleOpponents.Count == 0)
-                {
-                    inBattle = false;
-                }
+                RemoveBattleOpponent(opponent);
             }
 
             GameManager.Instance.EndTurn();

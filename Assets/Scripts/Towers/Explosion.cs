@@ -1,11 +1,11 @@
 using System.Collections;
 using UnityEngine;
 
-namespace ProtectTheCastle.Towers.Balls
+namespace ProtectTheCastle.Towers
 {
-    public class Impact : MonoBehaviour, IImpact
+    public class Explosion : MonoBehaviour, IExplosion
     {
-        public float duration { get; private set; } = 2f;
+        private float duration = 2f;
 
         private void Awake()
         {

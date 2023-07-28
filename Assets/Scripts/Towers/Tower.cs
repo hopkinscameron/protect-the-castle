@@ -25,6 +25,8 @@ namespace ProtectTheCastle.Towers
         [SerializeField]
         private GameObject _ballPrefab;
         [SerializeField]
+        private GameObject _dealthAnimation;
+        [SerializeField]
         private List<GameObject> _playersToAttack;
         [SerializeField]
         private GameObject _currentTarget;
@@ -63,6 +65,7 @@ namespace ProtectTheCastle.Towers
 
         public void HandleDeath()
         {
+            Instantiate(_dealthAnimation, transform.position, transform.rotation);
             Destroy(gameObject);
         }
 
@@ -155,7 +158,7 @@ namespace ProtectTheCastle.Towers
         private IEnumerator Fire()
         {
             _timeSinceLastShot = Time.time + coolDown;
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.5f);
             
             if (_currentTarget != null)
             {

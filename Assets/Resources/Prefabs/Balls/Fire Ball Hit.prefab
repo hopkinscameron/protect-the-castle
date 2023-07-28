@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8274100104952004914}
   - component: {fileID: 9189382317583205210}
   - component: {fileID: 4452049669760294818}
-  - component: {fileID: 4426354150444974978}
+  - component: {fileID: 8718760467739281}
   m_Layer: 0
   m_Name: Fire Ball Hit
   m_TagString: Untagged
@@ -4929,7 +4929,7 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
---- !u!114 &4426354150444974978
+--- !u!114 &8718760467739281
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4938,7 +4938,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3585308110140511625}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 153ea3b049c0115448849cb5596f234f, type: 3}
+  m_Script: {fileID: 11500000, guid: 5891b891cf10efb4ab0351f40cf2667f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6787231864919196023

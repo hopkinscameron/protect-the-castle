@@ -417,6 +417,7 @@ MonoBehaviour:
   _type: 1
   _muzzle: {fileID: 4000581814333341742}
   _ballPrefab: {fileID: 9150148784569172422, guid: 8afebf3bdb3e3824584844d64ae19f4a, type: 3}
+  _dealthAnimation: {fileID: 2596249773343204321, guid: 58a3268de997b694a9c32b916330f8f4, type: 3}
   _playersToAttack: []
   _currentTarget: {fileID: 0}
 --- !u!1 &7202222634340849116

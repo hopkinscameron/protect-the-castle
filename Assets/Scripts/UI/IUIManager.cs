@@ -4,5 +4,7 @@ namespace ProtectTheCastle.UI
     {
         void StartGame();
         void PauseGame(bool paused);
+        void ShowPlayerControls(bool show);
+        void DirectionClicked(string direction);
     }
 }

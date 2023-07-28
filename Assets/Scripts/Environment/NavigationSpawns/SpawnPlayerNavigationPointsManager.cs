@@ -116,8 +116,9 @@ namespace ProtectTheCastle.Environment.NavigationSpawns
             return spawns.Select((spawn, i) => {
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 capsule.name = "Player Spawn Capsule " + positionTitle + " " + i;
+                capsule.tag = Constants.NAVIGATION_POINT_TAG;
                 capsule.transform.position = new Vector3(spawn.x, DEFAULT_Y_POSITION, spawn.z);
-                capsule.GetComponent<Renderer>().material.color = Color.white;
+                capsule.GetComponent<Renderer>().enabled = false;
                 var playerNavigationSpawn = capsule.AddComponent<PlayerNavigationSpawn>();
                 playerNavigationSpawn.isDecisionSpawn = spawn.isDecisionSpawn;
                 playerNavigationSpawn.isPlayer1WinCondition = positionTitle == "Common" && i == spawns.Count - 1;

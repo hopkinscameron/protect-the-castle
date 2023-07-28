@@ -32,7 +32,6 @@ namespace ProtectTheCastle.Game
         private GameObject _player2LastCharacterMoved;
         private int attemptsToMove = 0;
         private bool moving = false;
-        private EnumPlayerMoveDirection directionClicked;
 
         private void Awake()
         {
@@ -59,12 +58,7 @@ namespace ProtectTheCastle.Game
 
             if (!gameInProgress) return;
 
-            directionClicked = GetPlayerMoveDirectionBasedOnInput();
-            if(directionClicked != EnumPlayerMoveDirection.Unknown && isPlayer1Turn && !moving)
-            {
-                moving = true;
-                AttemptToMovePlayer();
-            }
+            DirectionClicked(GetPlayerMoveDirectionBasedOnInput());
         }
 
         public bool StartGame()
@@ -84,6 +78,7 @@ namespace ProtectTheCastle.Game
                 SpawnPlayers();
 
                 FocusCharacter(_player1[0]);
+                UIManager.Instance.ShowPlayerControls(true);
             }
 
             return gameStarted;
@@ -148,7 +143,16 @@ namespace ProtectTheCastle.Game
             return false;
         }
 
-        public void MovePlayer(GameObject characterToMove)
+        public void DirectionClicked(EnumPlayerMoveDirection direction)
+        {
+            if(direction != EnumPlayerMoveDirection.Unknown && isPlayer1Turn && !moving)
+            {
+                moving = true;
+                GetCharacterAndMove(direction);
+            }
+        }
+
+        public void MovePlayer(GameObject characterToMove, EnumPlayerMoveDirection directionClicked)
         {
             if (!gameInProgress || !_gameReady || characterToMove == null
                 || (!isPlayer1Turn && attemptsToMove >= (_player2.Count * 2))) return;
@@ -177,8 +181,12 @@ namespace ProtectTheCastle.Game
                     if (!couldMove && !isPlayer1Turn)
                     {
                         attemptsToMove++;
-                        AttemptToMovePlayer();
+                        GetCharacterAndMove(directionClicked);
                         return;
+                    }
+                    else if (couldMove && isPlayer1Turn)
+                    {
+                        UIManager.Instance.ShowPlayerControls(false);
                     }
 
                     attemptsToMove = 0;
@@ -267,15 +275,16 @@ namespace ProtectTheCastle.Game
             if (!isPlayer1Turn)
             {
                 yield return new WaitForSeconds(2);
-                AttemptToMovePlayer();
+                GetCharacterAndMove(EnumPlayerMoveDirection.Forward);
             }
             else
             {
+                UIManager.Instance.ShowPlayerControls(true);
                 moving = false;
             }
         }
 
-        private void AttemptToMovePlayer()
+        private void GetCharacterAndMove(EnumPlayerMoveDirection directionClicked)
         {
             GameObject characterToMove = null;
             if (isPlayer1Turn)
@@ -299,7 +308,7 @@ namespace ProtectTheCastle.Game
                 }
             }
 
-            MovePlayer(characterToMove);
+            MovePlayer(characterToMove, directionClicked);
         }
 
         private void FocusCharacter(GameObject characterToFocus)

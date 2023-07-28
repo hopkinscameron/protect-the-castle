@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using ProtectTheCastle.Shared;
 using UnityEngine;
 
 namespace ProtectTheCastle.Environment.AISpawns
@@ -81,8 +82,9 @@ namespace ProtectTheCastle.Environment.AISpawns
             return spawns.Select((spawn, i) => {
                 GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 sphere.name = "AI Spawn Sphere " + i;
+                sphere.tag = Constants.NAVIGATION_POINT_TAG;
                 sphere.transform.position = new Vector3(spawn.x, 0.5f, spawn.z);
-                sphere.GetComponent<Renderer>().material.color = Color.cyan;
+                sphere.GetComponent<Renderer>().enabled = false;
                 sphere.GetComponent<SphereCollider>().enabled = false;
                 return sphere;
             }).ToList();

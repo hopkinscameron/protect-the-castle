@@ -1,3 +1,4 @@
+using ProtectTheCastle.Players.Enums;
 using UnityEngine;
 
 namespace ProtectTheCastle.Game
@@ -15,7 +16,8 @@ namespace ProtectTheCastle.Game
         bool FinishPickingPlayers();
         bool StartPickingTowers();
         bool FinishPickingTowers();
-        void MovePlayer(GameObject characterToMove);
+        void DirectionClicked(EnumPlayerMoveDirection direction);
+        void MovePlayer(GameObject characterToMove, EnumPlayerMoveDirection directionClicked);
         void EndTurn();
         bool EndGame(GameObject winner);
     }

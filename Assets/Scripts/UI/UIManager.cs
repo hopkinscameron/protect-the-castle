@@ -1,4 +1,6 @@
+using System;
 using ProtectTheCastle.Game;
+using ProtectTheCastle.Players.Enums;
 using UnityEngine;
 
 namespace ProtectTheCastle.UI
@@ -9,6 +11,7 @@ namespace ProtectTheCastle.UI
         
         public GameObject panel;
         public GameObject mainScreen;
+        public GameObject chooseDirections;
 
         private void Awake()
         {
@@ -38,6 +41,27 @@ namespace ProtectTheCastle.UI
         {
             panel.SetActive(paused);
             mainScreen.SetActive(paused);
+        }
+
+        public void ShowPlayerControls(bool show)
+        {
+            chooseDirections.SetActive(show);
+        }
+
+        public void DirectionClicked(string direction)
+        {
+            if (direction.Equals("left", StringComparison.OrdinalIgnoreCase))
+            {
+                GameManager.Instance.DirectionClicked(EnumPlayerMoveDirection.Left);
+            }
+            else if (direction.Equals("right", StringComparison.OrdinalIgnoreCase))
+            {
+                GameManager.Instance.DirectionClicked(EnumPlayerMoveDirection.Right);
+            }
+            else if (direction.Equals("up", StringComparison.OrdinalIgnoreCase))
+            {
+                GameManager.Instance.DirectionClicked(EnumPlayerMoveDirection.Forward);
+            }
         }
     }
 }

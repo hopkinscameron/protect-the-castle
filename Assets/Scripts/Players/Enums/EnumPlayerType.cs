@@ -1,12 +1,12 @@
-namespace ProtectTheCastle.Enums.Players
+namespace ProtectTheCastle.Players.Enums
 {
     public enum EnumPlayerType
     {
         Normal,
-        Fire,
-        Grass,
-        Water,
-        Ice,
-        Poison,
+        Hero,
+        Soldier,
+        Mercenary,
+        Warrior,
+        Magic,
     }
 }

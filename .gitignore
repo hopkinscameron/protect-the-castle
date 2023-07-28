@@ -86,3 +86,6 @@ packages-lock.json
 ProjectVersion.txt
 SceneTemplateSettings.json
 /[Pp]roject[Ss]ettings
+
+# Downloaded assets that aren't made to prefabs
+/[Aa]ssets/[Rr]esources/3rdParty

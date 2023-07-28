@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ProtectTheCastle.Tower.Balls
+namespace ProtectTheCastle.Towers.Balls
 {
     public interface IBall
     {

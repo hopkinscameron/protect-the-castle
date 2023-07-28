@@ -1,6 +1,8 @@
+using System;
+
 namespace ProtectTheCastle.Game
 {
-    [System.Serializable]
+    [Serializable]
     public class TowerPrefabSettings 
     {
         public TowerPrefabTypeSettings normal;
@@ -11,7 +13,7 @@ namespace ProtectTheCastle.Game
         public TowerPrefabTypeSettings poison;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class TowerPrefabTypeSettings 
     {
         public float coolDown;

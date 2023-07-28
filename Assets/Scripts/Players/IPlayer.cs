@@ -1,3 +1,4 @@
+using ProtectTheCastle.Players.Enums;
 using UnityEngine;
 
 namespace ProtectTheCastle.Players
@@ -7,10 +8,16 @@ namespace ProtectTheCastle.Players
         float damage { get; }
         float health { get; }
         float speed { get; }
+        bool alive { get; }
+        bool moving { get; }
+        bool inBattle { get; }
 
-        void Attack(GameObject playerToAttack);
+        void BeginBattle();
+        void Attack();
         void Attacked(float amount);
         void HandleDeath();
-        void Move();
+        void RemoveBattleOpponent(GameObject opponent);
+        bool Move(EnumPlayerMoveDirection direction);
+        void SetHome(GameObject homeBase);
     }
 }

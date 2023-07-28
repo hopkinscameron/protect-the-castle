@@ -147,3 +147,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _type: 1
+  _hitAnimation: {fileID: 3585308110140511625, guid: 1f296884cb39f1d4095830f928aa34ff, type: 3}

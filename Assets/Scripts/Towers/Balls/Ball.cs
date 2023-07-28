@@ -1,9 +1,10 @@
 using ProtectTheCastle.Game;
 using ProtectTheCastle.Players;
-using ProtectTheCastle.Tower.Enums.Balls;
+using ProtectTheCastle.Shared;
+using ProtectTheCastle.Towers.Enums.Balls;
 using UnityEngine;
 
-namespace ProtectTheCastle.Tower.Balls
+namespace ProtectTheCastle.Towers.Balls
 {
     public class Ball : MonoBehaviour, IBall
     {
@@ -12,28 +13,45 @@ namespace ProtectTheCastle.Tower.Balls
         
         [SerializeField]
         private EnumBallType _type;
-        private Vector3? _targetPosition;
+        [SerializeField]
+        private GameObject _hitAnimation;
+        private GameObject _target;
+        private float _tagetCenter;
+        private IPlayer _currentTargetPlayerScript;
 
-        void Start()
+        private void Awake()
         {
             BallPrefabTypeSettings settings = GetSettings();
             speed = settings.speed;
             damage = settings.damage;
         }
 
-        void FixedUpdate()
+        private void FixedUpdate()
         {
+            if (!GameManager.Instance.gameInProgress) return;
+
             MoveTowardsTarget();
         }
 
         public void HandleDeath()
         {
+            Instantiate(_hitAnimation, transform.position, transform.rotation);
             Destroy(gameObject);
         }
 
         public void SetTarget(GameObject seekingTarget)
         {
-            _targetPosition = seekingTarget.transform.position;
+            if (seekingTarget == null)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _tagetCenter = seekingTarget.GetComponent<CharacterController>().center.y;
+            _target = seekingTarget;
+
+            var playerScript = (_target.GetComponent(typeof(IPlayer)) as IPlayer);
+            _currentTargetPlayerScript = playerScript;
         }
 
         private BallPrefabTypeSettings GetSettings()
@@ -55,50 +73,46 @@ namespace ProtectTheCastle.Tower.Balls
 
         private void MoveTowardsTarget()
         {
-            if (_targetPosition != null)
+            if (_target != null && _currentTargetPlayerScript.alive && _currentTargetPlayerScript.moving)
             {
                 var step = speed * Time.deltaTime;
-                transform.position = Vector3.MoveTowards(transform.position, _targetPosition.Value, step);
+                var targetPosition = _target.transform.position;
+                var newTargetPosition = new Vector3(targetPosition.x, _tagetCenter, targetPosition.z);
+                transform.position = Vector3.MoveTowards(transform.position, newTargetPosition, step);
+            }
+            else if (_currentTargetPlayerScript != null && (!_currentTargetPlayerScript.alive || !_currentTargetPlayerScript.moving))
+            {
+                HandleDeath();
             }
         }
 
         private void OnCollisionEnter(Collision other)
         {
-            var collidedTag = other.gameObject.tag.ToLower();
-            switch (collidedTag)
+            if (other.gameObject.tag.Equals(Constants.NAVIGATION_POINT_TAG)) return;
+
+            if (other.gameObject == _target)
             {
-                case "player":
-                    HandleHit(other.gameObject);
-                    HandleDeath();
-                    break;
-                case "wall":
-                    HandleDeath();
-                    break;
-                default:
-                    break;
+                HandleTargetHit();
             }
+            
+            HandleDeath();
         }
 
         private void OnTriggerEnter(Collider other) 
         {
-            var collidedTag = other.gameObject.tag.ToLower();
-            switch (collidedTag)
+            if (other.gameObject.tag.Equals(Constants.NAVIGATION_POINT_TAG)) return;
+
+            if (other.gameObject == _target)
             {
-                case "player":
-                    HandleHit(other.gameObject);
-                    HandleDeath();
-                    break;
-                case "wall":
-                    HandleDeath();
-                    break;
-                default:
-                    break;
+                HandleTargetHit();
             }
+            
+            HandleDeath();
         }
 
-        private void HandleHit(GameObject playerHit)
+        private void HandleTargetHit()
         {
-            playerHit.GetComponent<Player>().Attacked(damage);
+            (_target.GetComponent(typeof(IPlayer)) as IPlayer).Attacked(damage);
         }
     }
 }

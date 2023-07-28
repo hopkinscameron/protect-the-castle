@@ -1,32 +1,32 @@
 {
 	"normal": {
 		"damage": 10,
-		"health": 3,
-		"speed": 7
+		"health": 100,
+		"speed": 2
 	},
-	"fire": {
-		"damage": 12,
-		"health": 3,
-		"speed": 7
+	"hero": {
+		"damage": 8,
+		"health": 75,
+		"speed": 4
 	},
-	"grass": {
-		"damage": 12,
-		"health": 3,
-		"speed": 7
+	"soldier": {
+		"damage": 13,
+		"health": 100,
+		"speed": 1.5
 	},
-	"water": {
-		"damage": 12,
-		"health": 3,
-		"speed": 7
+	"mercenary": {
+		"damage": 25,
+		"health": 150,
+		"speed": 1
 	},
-	"ice": {
-		"damage": 12,
-		"health": 3,
-		"speed": 7
+	"warrior": {
+		"damage": 20,
+		"health": 150,
+		"speed": 1.25
 	},
-	"poison": {
-		"damage": 12,
-		"health": 3,
-		"speed": 7
+	"magic": {
+		"damage": 15,
+		"health": 90,
+		"speed": 2
 	}
 }

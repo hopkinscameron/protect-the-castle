@@ -5,6 +5,7 @@ using ProtectTheCastle.Environment.NavigationSpawns;
 using ProtectTheCastle.Game;
 using ProtectTheCastle.Players.Enums;
 using ProtectTheCastle.Shared;
+using ProtectTheCastle.UI;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -20,8 +21,6 @@ namespace ProtectTheCastle.Players
         public bool alive { get; private set; } = true;
         public bool moving { get; private set; }
         public bool inBattle { get; private set; }
-        public float remainingDistance;
-        public float navVelocity;
 
         [SerializeField]
         private EnumPlayerType _type;
@@ -33,14 +32,16 @@ namespace ProtectTheCastle.Players
         private IPlayerNavigationSpawn _nextTargetNavSpawn;
         private INavMeshAgentHelper _navMeshAgentHelper;
         private bool _player1;
-        [SerializeField]
-        private List<GameObject> battleOpponents = new List<GameObject>();
+        private List<GameObject> _battleOpponents = new List<GameObject>();
+        private IHealthBar _healthBar;
+        private float _maxHealth;
 
         private void Awake()
         {
             _navMeshAgent = GetComponent<NavMeshAgent>();
             _animator = GetComponent<Animator>();
             _navMeshAgentHelper = new NavMeshAgentHelper();
+            _healthBar = GetComponentInChildren(typeof(IHealthBar)) as IHealthBar;
         }
 
         private void Start()
@@ -50,6 +51,8 @@ namespace ProtectTheCastle.Players
             health = settings.health;
             speed = settings.speed;
             _navMeshAgent.speed = speed;
+            _maxHealth = settings.health;
+            _healthBar.SetHealth(_maxHealth, health);
         }
 
         private void FixedUpdate()
@@ -70,24 +73,25 @@ namespace ProtectTheCastle.Players
             {
                 if (_player1 && potentialTarget.tag.Equals(Constants.Player2.TAG))
                 {
-                    battleOpponents.Add(potentialTarget);
+                    _battleOpponents.Add(potentialTarget);
                 }
                 else if (!_player1 && potentialTarget.tag.Equals(Constants.Player1.TAG))
                 {
-                    battleOpponents.Add(potentialTarget);
+                    _battleOpponents.Add(potentialTarget);
                 }
             }
         }
 
         public void Attack()
         {
-            if (battleOpponents.Count == 0) return;
+            if (_battleOpponents.Count == 0) return;
             StartCoroutine("AttackOpponent");
         }
 
         public void Attacked(float amount)
         {
             health = health - amount;
+            _healthBar.SetHealth(_maxHealth, health);
 
             if (health <= 0)
             {
@@ -157,8 +161,6 @@ namespace ProtectTheCastle.Players
         {
             _animator.SetFloat(Constants.Animations.SPEED_NAME, _navMeshAgent.velocity.magnitude);
             moving = !_navMeshAgentHelper.ReachedDestination(_navMeshAgent);
-            remainingDistance = _navMeshAgent.remainingDistance;
-            navVelocity = _navMeshAgent.velocity.magnitude;
 
             if (!moving && ((GameManager.Instance.isPlayer1Turn && _player1) || (!GameManager.Instance.isPlayer1Turn && !_player1)))
             {
@@ -202,7 +204,7 @@ namespace ProtectTheCastle.Players
 
         private IEnumerator AttackOpponent()
         {
-            var opponent = battleOpponents[0];
+            var opponent = _battleOpponents[0];
             var playerScript = opponent.GetComponent(typeof(IPlayer)) as IPlayer;
             _animator.SetTrigger(Constants.Animations.ATTACK_NAME);
 
@@ -212,9 +214,9 @@ namespace ProtectTheCastle.Players
             
             if (!playerScript.alive)
             {
-                battleOpponents.Remove(opponent);
+                _battleOpponents.Remove(opponent);
 
-                if (battleOpponents.Count == 0)
+                if (_battleOpponents.Count == 0)
                 {
                     inBattle = false;
                 }

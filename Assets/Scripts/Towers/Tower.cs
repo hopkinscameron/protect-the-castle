@@ -6,6 +6,7 @@ using ProtectTheCastle.Game;
 using ProtectTheCastle.Players;
 using ProtectTheCastle.Shared;
 using ProtectTheCastle.Towers.Balls;
+using ProtectTheCastle.UI;
 using UnityEngine;
 
 namespace ProtectTheCastle.Towers
@@ -30,10 +31,13 @@ namespace ProtectTheCastle.Towers
         private IPlayer _currentTargetPlayerScript;
         private float _timeSinceLastShot;
         private bool _isPlayerTower;
+        private IHealthBar _healthBar;
+        private float _maxHealth;
 
         private void Awake()
         {
             _isPlayerTower = gameObject.tag.Equals(Constants.Player1.TOWER_TAG, System.StringComparison.OrdinalIgnoreCase);
+            _healthBar = GetComponentInChildren(typeof(IHealthBar)) as IHealthBar;
         }
 
         private void Start()
@@ -43,6 +47,8 @@ namespace ProtectTheCastle.Towers
             health = settings.health;
             healthDecreaseAmount = settings.healthDecreaseAmount;
             minEngageDistance = settings.minEngageDistance;
+            _maxHealth = settings.health;
+            _healthBar.SetHealth(_maxHealth, health);
         }
 
         private void FixedUpdate()
@@ -93,6 +99,7 @@ namespace ProtectTheCastle.Towers
                 if (IsTargetWithinDistance(_currentTarget) && _currentTargetPlayerScript.alive && _currentTargetPlayerScript.moving)
                 {
                     health = health - healthDecreaseAmount * Time.deltaTime;
+                    _healthBar.SetHealth(_maxHealth, health);
                     if (health <= 0)
                     {
                         HandleDeath();

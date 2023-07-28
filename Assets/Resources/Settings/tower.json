@@ -2,37 +2,37 @@
 	"normal": {
 		"coolDown": 5,
 		"health": 100,
-		"healthDecreaseAmount": 1,
+		"healthDecreaseAmount": 3,
 		"minEngageDistance": 15
 	},
 	"fire": {
 		"coolDown": 7.5,
 		"health": 100,
-		"healthDecreaseAmount": 1.5,
+		"healthDecreaseAmount": 5,
 		"minEngageDistance": 20
 	},
 	"grass": {
 		"coolDown": 7,
 		"health": 100,
-		"healthDecreaseAmount": 1.5,
+		"healthDecreaseAmount": 5,
 		"minEngageDistance": 20
 	},
 	"water": {
 		"coolDown": 7.5,
 		"health": 100,
-		"healthDecreaseAmount": 1.5,
+		"healthDecreaseAmount": 5,
 		"minEngageDistance": 20
 	},
 	"ice": {
 		"coolDown": 7,
 		"health": 100,
-		"healthDecreaseAmount": 1.5,
+		"healthDecreaseAmount": 5,
 		"minEngageDistance": 20
 	},
 	"poison": {
 		"coolDown": 7,
 		"health": 100,
-		"healthDecreaseAmount": 1.5,
+		"healthDecreaseAmount": 5,
 		"minEngageDistance": 20
 	}
 }
